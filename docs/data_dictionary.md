@@ -134,3 +134,38 @@ Spike reference value: Aguascalientes × 2024-01 → `TotalGlobal` = 79.
   historical snapshot.
 - `sin-fecha.csv` has no sexo or municipio breakdown (only the Totales
   aggregate exposes the undated diff).
+
+## Vintage snapshots (data/vintages/)
+
+Append-only register views written by `scripts/scrape_vintage.py`
+(scheduled monthly on the 9th at 01:00 via the launchd agent
+`com.desaparecidosmx.vintage`; logs in `logs/vintage-scrape.log`). Each
+run refetches the trailing 24 complete months for all 33 entidades and
+writes `<YYYY-MM-DD>.csv` (same schema as the monthly CSVs, window
+months plus each estado's sin-fecha rows) with a `.meta.json` sidecar
+(window, row count, per-slice failures). Before its first refetch a run
+also snapshots the pre-refetch window under its old `consultado_en`
+label, so no vintage is ever lost. Never edit or overwrite an existing
+vintage file — the whole point is the diff between them (late
+registrations push desaparecida counts up; localizaciones pull them
+down, so revisions run in both directions). An interrupted run resumes
+with `--label <that run's date>`; months already refetched under that
+label are skipped.
+
+## Derived outputs (data/processed/derived/)
+
+Produced by `scripts/baseline_backtest.py` from the all-states yearly
+files (dated rows, categoría DESAPARECIDA_O_NO_LOCALIZADA, entidad ×
+month totals; the partial scrape month is dropped). Analytical, not
+source data — regenerate rather than hand-edit.
+
+- `backtest_metrics.csv`: `cve_entidad`, `entidad`, `modelo`, `mae`,
+  `mase`, `n`. Rolling-origin backtest (origins from 2015-12, horizons
+  1–6, targets through 2025-12), MASE scaled by the seasonal-naive
+  error of the same series.
+- `anomaly_flags.csv`: `cve_entidad`, `entidad`, `periodo`, `conteo`,
+  `esperado`, `z`, `bandera` (ALTO/BAJO at |z| ≥ 2), `maduro`. Last
+  12 months per entidad; `esperado` is the one-step indice_estacional
+  forecast, `z` a robust (MAD-scaled) residual score. `maduro = False`
+  months are still receiving late registrations: ALTO flags there are
+  conservative, BAJO flags unreliable.
