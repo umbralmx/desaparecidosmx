@@ -39,6 +39,7 @@ undated_kpi = int(
 )
 c1, c2, c3, c4 = st.columns(4)
 c1.metric("Registros en el periodo", theme.fmt(int(por_categoria_kpi.sum())))
+# umbral-lint: ignore[terminology] — etiqueta oficial del RNPDNO
 c2.metric(
     "Desaparecidas o no localizadas",
     theme.fmt(int(por_categoria_kpi["DESAPARECIDA_O_NO_LOCALIZADA"])),
