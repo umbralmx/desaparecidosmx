@@ -1,3 +1,4 @@
+# umbral-lint: ignore-file[terminology] — constantes del RNPDNO, no redacción
 """Configuration for the RNPDNO Versión Estadística pipeline.
 
 Endpoint and payload structure discovered by inspecting the dashboard's

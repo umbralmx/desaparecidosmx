@@ -118,6 +118,7 @@ st.divider()
 # ── Cómo citar ──────────────────────────────────────────────────────
 st.markdown("### Cómo citar")
 st.code(
+    # umbral-lint: ignore[snapshot-tag] — la cita arma su propio tag arriba
     "Umbral (2026). Registros del RNPDNO por entidad, mes, categoría, "
     f"sexo y municipio (snapshot rnpdno-{consultado[:7]}, consultado "
     f"{consultado}). Datos fuente: RNPDNO, Comisión Nacional de "

@@ -1,3 +1,4 @@
+# umbral-lint: ignore-file[terminology] — constantes del RNPDNO, no redacción
 """Transform tests against the cached AGS x 2024-01 raw slice.
 
 These run against data/raw/ (gitignored, never committed), so they are

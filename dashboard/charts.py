@@ -1,3 +1,6 @@
+# umbral-lint: ignore-file[chart-source-present] — estas funciones sólo
+# construyen figuras; la línea de fuente la dibuja theme.chart_frame(),
+# que ninguna vista puede saltarse.
 """Chart builders. Every figure follows docs/umbral-brand.md §6:
 horizontal gridlines only, one series in signal, direct labels instead
 of legend boxes, dotted stroke + labeled rule for the uncertain tail.
@@ -79,7 +82,7 @@ def trend_fig(series: dict[str, tuple[pd.Series, str]]) -> go.Figure:
             fig.add_annotation(
                 x=anchor, y=float(serie[anchor]),
                 text=label, showarrow=False, xanchor="left", xshift=8,
-                font=dict(family="IBM Plex Sans", size=12, color=color),
+                font=dict(family=theme.FONT_BODY, size=12, color=color),
                 bgcolor=theme.MODE["panel"],
             )
     first = next(iter(series.values()))[0]
@@ -95,7 +98,7 @@ def trend_fig(series: dict[str, tuple[pd.Series, str]]) -> go.Figure:
             x=cut, y=1, yref="paper", yanchor="top",
             text="provisional →", showarrow=False, xanchor="left",
             xshift=4,
-            font=dict(family="IBM Plex Mono", size=11,
+            font=dict(family=theme.FONT_MONO, size=12,
                       color=theme.MODE["caption"]),
         )
     fig.update_layout(**theme.plotly_layout())
@@ -144,7 +147,7 @@ def ranking_fig(
             marker=dict(color=colors),
             text=text,
             textposition="outside",
-            textfont=dict(family="IBM Plex Mono", size=11,
+            textfont=dict(family=theme.FONT_MONO, size=12,
                           color=theme.MODE["muted"]),
             customdata=hover,
             hovertemplate="%{y} · %{customdata}<extra></extra>",
@@ -160,7 +163,7 @@ def ranking_fig(
     fig.update_xaxes(visible=False, rangemode="tozero")
     fig.update_yaxes(
         gridcolor="rgba(0,0,0,0)",
-        tickfont=dict(family="IBM Plex Sans", size=12,
+        tickfont=dict(family=theme.FONT_BODY, size=12,
                       color=theme.MODE["ink"]),
     )
     return fig
@@ -186,7 +189,7 @@ def cat_sexo_fig(df: pd.DataFrame) -> go.Figure:
             ),
             text=[f"{v:,}" for v in df["conteo"]],
             textposition="outside",
-            textfont=dict(family="IBM Plex Mono", size=11,
+            textfont=dict(family=theme.FONT_MONO, size=12,
                           color=theme.MODE["muted"]),
             cliponaxis=False,
             hovertemplate="%{x} · %{y:,.0f}<extra></extra>",
@@ -196,7 +199,7 @@ def cat_sexo_fig(df: pd.DataFrame) -> go.Figure:
     fig.update_layout(height=400, bargap=0.35, margin=dict(t=24))
     fig.update_yaxes(tickformat="~s")
     fig.update_xaxes(
-        tickfont=dict(family="IBM Plex Sans", size=12,
+        tickfont=dict(family=theme.FONT_BODY, size=12,
                       color=theme.MODE["ink"]),
     )
     return fig

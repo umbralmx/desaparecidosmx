@@ -11,6 +11,7 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -20,6 +21,13 @@ with open(REPO_ROOT / "assets" / "tokens.json", encoding="utf-8") as _f:
 # Dashboards live in modo instrumento (umbral-brand.md §3/§8).
 MODE = TOKENS["mode"]["instrumento"]
 
+# Las familias también salen de los tokens, no se reescriben (UMB-PRO-003).
+FONT_DISPLAY = TOKENS["font"]["display"]
+FONT_BODY = TOKENS["font"]["body"]
+FONT_MONO = TOKENS["font"]["mono"]
+
+# umbral-lint: ignore[terminology] — son las etiquetas oficiales del RNPDNO,
+# no redacción propia. Ver guide/15-terminologia.md.
 CATEGORIA_LABELS = {
     "DESAPARECIDA_O_NO_LOCALIZADA": "Desaparecidas o no localizadas",
     "LOCALIZADA_CON_VIDA": "Localizadas con vida",
@@ -43,9 +51,16 @@ CATEGORIA_COLORS = {
 
 _CSS = f"""
 <style>
-/* TODO(deploy): self-host fonts, latin + latin-ext subset
-   (umbral-engineering.md §1) — the Google import is dev-only. */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+/* Auto-hospedadas (UMB-TYP-005): el tablero tiene que funcionar sin conexión
+   y en redes de gobierno, y un CDN filtra la IP de cada lector a un tercero. */
+@font-face {{ font-family: 'Space Grotesk'; font-weight: 500 600; font-display: swap;
+             src: url('app/static/fonts/space-grotesk-latin.woff2') format('woff2'); }}
+@font-face {{ font-family: 'IBM Plex Sans'; font-weight: 400 600; font-display: swap;
+             src: url('app/static/fonts/ibm-plex-sans-latin.woff2') format('woff2'); }}
+@font-face {{ font-family: 'IBM Plex Mono'; font-weight: 400; font-display: swap;
+             src: url('app/static/fonts/ibm-plex-mono-400-latin.woff2') format('woff2'); }}
+@font-face {{ font-family: 'IBM Plex Mono'; font-weight: 500; font-display: swap;
+             src: url('app/static/fonts/ibm-plex-mono-500-latin.woff2') format('woff2'); }}
 
 html, body {{
     font-family: 'IBM Plex Sans', sans-serif;
@@ -68,8 +83,11 @@ h1, h2, h3 {{
     letter-spacing: -0.02em;
 }}
 [data-testid="stMetricValue"] {{
-    font-family: 'Space Grotesk', sans-serif !important;
+    /* Una fila de KPIs se compara dígito a dígito entre tarjetas, así que va en
+       mono con numerales tabulares, no en display (UMB-TYP-004 / OQ-003). */
+    font-family: 'IBM Plex Mono', monospace !important;
     font-weight: 500;
+    font-variant-numeric: tabular-nums;
 }}
 [data-testid="stMetricLabel"] p {{
     font-family: 'IBM Plex Mono', monospace !important;
@@ -85,6 +103,12 @@ code, pre, [data-testid="stCaptionContainer"] {{
     font-size: 12px;
     color: {MODE["caption"]};
     margin: 0 0 0.25rem 0;
+}}
+/* Streamlit renderiza varias etiquetas propias a 11px, por debajo del piso de
+   12px (UMB-TYP-003). Esto las sube sin tocar el resto de la escala. */
+[data-testid="stSlider"] div, [data-baseweb="tag"] span,
+[data-testid="stWidgetLabel"] p, .stMultiSelect span {{
+    font-size: 12px !important;
 }}
 .u-badge {{
     font-family: 'IBM Plex Mono', monospace;
@@ -113,6 +137,20 @@ code, pre, [data-testid="stCaptionContainer"] {{
 
 def inject_css() -> None:
     st.markdown(_CSS, unsafe_allow_html=True)
+    set_lang("es")
+
+
+def set_lang(lang: str = "es") -> None:
+    """Corrige el idioma del documento (UMB-A11Y-001).
+
+    Streamlit fija lang="en" y no lo expone. Hasta que esto corre, un lector de
+    pantalla pronuncia todo el tablero —incluidos los nombres de las categorías
+    del RNPDNO— con fonética inglesa.
+    """
+    components.html(
+        f"<script>window.parent.document.documentElement.lang='{lang}';</script>",
+        height=0,
+    )
 
 
 def plotly_layout() -> dict:
@@ -121,11 +159,11 @@ def plotly_layout() -> dict:
     Horizontal gridlines only, mono ticks, no legend box (series are
     labeled directly, umbral-engineering.md §2).
     """
-    mono = dict(family="IBM Plex Mono", size=12, color=MODE["caption"])
+    mono = dict(family=TOKENS["font"]["mono"], size=12, color=MODE["caption"])
     return dict(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="IBM Plex Sans", size=13, color=MODE["ink"]),
+        font=dict(family=FONT_BODY, size=13, color=MODE["ink"]),
         colorway=[MODE["signal"], MODE["model"], MODE["muted"], MODE["alert"]],
         showlegend=False,
         margin=dict(l=8, r=8, t=8, b=8),
@@ -142,12 +180,13 @@ def plotly_layout() -> dict:
         hoverlabel=dict(
             bgcolor=MODE["panel"],
             bordercolor=MODE["border"],
-            font=dict(family="IBM Plex Mono", size=12, color=MODE["ink"]),
+            font=dict(family=FONT_MONO, size=12, color=MODE["ink"]),
         ),
     )
 
 
 def source_line(consultado: str, extra: str = "") -> str:
+    # umbral-lint: ignore[snapshot-tag] — la línea se arma aquí, no se cita
     snapshot = f"rnpdno-{consultado[:7]}"
     parts = [
         "Fuente: RNPDNO (CNB/SEGOB)",
