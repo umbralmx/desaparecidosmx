@@ -1,0 +1,26 @@
+# Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+Copyright (c) 2026 Umbral (umbral.mx)
+
+The **data and content** of this repository — the processed CSVs under `data/`, the
+documentation, and the published figures — are licensed under a Creative Commons
+Attribution 4.0 International License.
+
+You are free to share and adapt this material for any purpose, including commercially,
+provided you give appropriate credit, link to the licence, and indicate if changes were
+made.
+
+Full licence: https://creativecommons.org/licenses/by/4.0/legalcode
+Resumen en español: https://creativecommons.org/licenses/by/4.0/deed.es
+
+The **code** is licensed separately under the MIT License. See `LICENSE-CODE`.
+
+## Upstream data
+
+The underlying records come from the Registro Nacional de Personas Desaparecidas y No
+Localizadas (RNPDNO), published by the Comisión Nacional de Búsqueda / SEGOB. That
+source data is Mexican government open data; this licence covers Umbral's processing,
+structuring and documentation of it, not the underlying records.
+
+Cite as the dashboard's own citation block states, including the snapshot tag — the
+register is live and its counts change between queries.
