@@ -65,11 +65,15 @@ aggregated from single-age × sex rows by
 
 **One row per entidad × month × categoría × sexo × municipio**, with a
 count column. Cells with a count of zero are omitted; absence of a row
-means zero. Two special row types:
+means zero. Three special row types:
 
 - `municipio = MUNICIPIO NO DESGLOSADO` — residual fallback row added
   only if the source table does not carry the full count (sexo and
   cve_municipio empty). The transform logs when this happens.
+- `municipio = SIN MUNICIPIO DE REFERENCIA` — TablaDetalle's own bucket
+  for records it cannot pin to a municipio, passed through verbatim
+  (`cve_municipio` empty; `sexo` present, unlike the residual row
+  above). Not synthesized here — this label comes from the source.
 - `sin-fecha.csv` rows — `periodo = SIN_FECHA`, sexo and municipio
   empty (the undated bucket is only available per categoría).
 
@@ -82,7 +86,7 @@ means zero. Two special row types:
 | `periodo`       | str    | `2024-01`        | The `fechaInicio`/`fechaFin` month filter sent to the API (first to last day of the month, `mostrarFechaNula=0`), or `SIN_FECHA` in `sin-fecha.csv`. |
 | `categoria`     | str    | `DESAPARECIDA_O_NO_LOCALIZADA` | `idEstatusVictima` filter used for the query. See "Categoría" below. |
 | `sexo`          | str    | `MUJER`          | Column header in the `TablaDetalle` response (`Hombres`/`Mujeres`/`Indeterminado`, normalized to singular uppercase). Empty on residual and SIN_FECHA rows. |
-| `cve_municipio` | str(5) | `01005`          | `cve_entidad` + 3-digit municipio code from `POST /Catalogo/Municipios` (`Value` field), joined to the table's municipio name. Empty when the name cannot be joined or on residual/SIN_FECHA rows. |
+| `cve_municipio` | str(5) | `01005`          | `cve_entidad` + 3-digit municipio code from `POST /Catalogo/Municipios` (`Value` field), joined to the table's municipio name. Empty on residual/SIN_MUNICIPIO_REFERENCIA/SIN_FECHA rows — any other name that fails to join raises `MunicipioProvenanceError` (see Validation invariants). |
 | `municipio`     | str    | `JESÚS MARÍA`    | Row label in the `TablaDetalle` response, verbatim; `MUNICIPIO NO DESGLOSADO` for residual rows; empty in `sin-fecha.csv`. |
 | `conteo`        | int    | `12`             | Cell value in the `TablaDetalle` HTML table (commas stripped). |
 | `consultado_en` | str    | `2026-07-08`     | UTC date the API was queried (from the cached `.meta.json`). The RNPDNO is a living register: counts for the same period change over time. |
@@ -123,6 +127,18 @@ For every entidad × month slice, `transform.py` enforces:
    A shortfall triggers the logged `MUNICIPIO NO DESGLOSADO` residual;
    an excess raises `ReconciliationError`.
 3. SIN_FECHA diffs must be non-negative.
+4. Every municipio name returned by `TablaDetalle` exists in that
+   entidad's own cached `CatalogoMunicipios`, except the source's own
+   `SIN MUNICIPIO DE REFERENCIA` bucket. Any other unrecognized name
+   raises `MunicipioProvenanceError` — the sum-based checks above stay
+   silent when a row is misattributed to the wrong entidad (it's still
+   counted somewhere), so this checks provenance instead of totals.
+5. `rnpdno/validate.py`'s `national_cross_check` (standalone, not run
+   automatically): sum of all 33 entidades' `Totales` for a periodo ==
+   a direct `idEstado=0` query for the same periodo. Requires all 34
+   `Totales` fetched close together in time — the register moves
+   continuously, so comparing across consultation dates weeks apart
+   will show drift unrelated to any bug (see DECISIONS.md #14).
 
 Spike reference value: Aguascalientes × 2024-01 → `TotalGlobal` = 79.
 
@@ -134,6 +150,12 @@ Spike reference value: Aguascalientes × 2024-01 → `TotalGlobal` = 79.
   historical snapshot.
 - `sin-fecha.csv` has no sexo or municipio breakdown (only the Totales
   aggregate exposes the undated diff).
+- Cross-entidad municipio leaks (see DECISIONS.md #13, #15) are
+  confirmed live upstream server behavior, not a caching/session bug
+  in this pipeline — but `MunicipioProvenanceError` only catches a leak
+  whose name isn't also a real municipio in the victim entidad's own
+  catalog. Many municipio names repeat across states, so this is a
+  floor on the bug's visibility, not a ceiling on its extent.
 
 ## Vintage snapshots (data/vintages/)
 

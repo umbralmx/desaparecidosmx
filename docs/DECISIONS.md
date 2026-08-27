@@ -229,3 +229,97 @@ whenever a call of this kind is made; keep entries short.
 - **Why:** Every choice falls out of the same principle the pipeline
   already encodes (entries 4, 5, 8): gaps are shown, not smoothed
   over, and nothing is claimed that the data can't defend.
+
+## 13. Municipio-provenance check: raise on cross-entidad TablaDetalle rows
+
+- **Problem:** Cross-checking committed CSVs against an independent
+  source (México Evalúa's published RNPDNO figures) turned up
+  entidad-level totals off by up to 3.65x, and confirmed cases of a
+  municipio name belonging to a *different* entidad's catalog showing
+  up in a state's `TablaDetalle` response (e.g. TIJUANA, XALAPA,
+  DURANGO rows inside other states' slices) — the server occasionally
+  answers a state-filtered request with another state's data. The
+  existing reconciliation invariant (entry 2) can't catch this: a
+  misattributed row still counts toward *some* entidad's `Totales`, so
+  sums keep reconciling even when a row is in the wrong file.
+- **Options:** (a) leave unrecognized names silently joining to an
+  empty `cve_municipio`, as before; (b) raise as soon as a name doesn't
+  match the entidad's own cached `CatalogoMunicipios`, mirroring how
+  `ReconciliationError` already treats a totals excess as a hard stop.
+- **Decision:** (b), as `MunicipioProvenanceError` in `transform.py`.
+  One legitimate case is carved out first: `SIN MUNICIPIO DE
+  REFERENCIA` is the source's own bucket for records it can't pin to a
+  municipio (not synthesized here, unlike `MUNICIPIO NO DESGLOSADO`)
+  and never joins by design. `run.py`'s existing log-and-continue
+  `Runner.attempt` (entry 10) means a bad slice is skipped and reported
+  in the run summary rather than silently written.
+- **Why:** Provenance and totals are independent invariants — a leak
+  can be invisible to one and caught by the other. Raising surfaces
+  the affected slice immediately instead of shipping a state-level
+  number an external check would later contradict.
+
+## 14. National cross-check as a standalone invariant, not wired into `run.py`
+
+- **Problem:** Issue #3's recommendation 2: verify sum(per-entidad
+  `Totales`) == a direct `idEstado=0` query, as a check independent of
+  #13 (a wrong-entidad leak still counts nationally either way, so it
+  can't catch drops/duplicates the way this can).
+- **Options:** (a) fold into `run.py` so every batch fetches a national
+  Totales per periodo and checks it inline; (b) a standalone module
+  (`validate.py`) run deliberately, separate from the regular
+  ingest → export → combine path.
+- **Decision:** (b). `ingest.fetch_national_totales` caches
+  `idEstado=0` Totales the same way per-entidad slices are cached, but
+  only `Totales` (not `TablaDetalle`, which at national scope would
+  return every municipio in the country for no benefit this check
+  needs). `validate.national_cross_check` reads cached JSON only —
+  never fetches — so it stays a fail-fast library call like
+  `transform_slice`, not another log-and-continue step in the batch.
+- **Why:** The check is only meaningful when every one of the 34
+  `Totales` responses (33 entidades + national) was fetched close
+  together in time — confirmed empirically: comparing a fresh national
+  fetch against 2024-01's per-entidad `Totales` (cached during the
+  original backfill, weeks to months earlier) showed a mismatch purely
+  from ordinary register drift, not a pipeline bug. Wiring this into
+  every `run.py` invocation would fetch a national total that's stale
+  relative to a resumed/partial batch by construction, generating false
+  positives. Keeping it standalone (run manually, ideally against a
+  same-session fetch of all 34) avoids that trap. Confirmed working on
+  a clean same-batch snapshot (all 33 entidades + national fetched
+  within the same few minutes, 2025-06): sums matched the direct
+  national query exactly on every field.
+
+## 15. Issue #3 recommendations 3–4: leak and total mismatch are upstream, not this pipeline
+
+- **Problem:** Two of issue #3's findings still needed a cause: (a) the
+  wrong-entidad municipio leak (entry 13) — is it *our* `Fetcher`
+  reusing one session across entidades, or the server itself? (b) the
+  large state-level divergence from México Evalúa — is it stale data
+  that's since corrected, or a real discrepancy?
+- **Tests run (live, see issue #3 for the full write-up):**
+  1. Fetched the three known-contaminated (source entidad, victim
+     entidad, periodo) triples back-to-back in one shared session —
+     each reproduced its exact original leaked municipio (SUCHIATE,
+     TLAJOMULCO DE ZÚÑIGA, TIJUANA). Then fetched CDMX × 2025-04 *alone*,
+     in a brand-new session with no prior request — SUCHIATE still
+     appeared. A leak that survives an isolated, zero-prior-request
+     session cannot be this pipeline's session/cookie reuse.
+  2. Re-fetched just `Totales` (cheap: 1 POST/slice) for the 4 outlier
+     entidades × Jan–Nov 2025 already committed. Fresh sums were within
+     ~1–3% of committed (Guanajuato −1.9%, CDMX −1.6%, Estado de México
+     −2.6%, Jalisco +0.8%) — ordinary register churn (entry 6), not the
+     4x-scale divergence against México Evalúa.
+- **Conclusion:** Both are upstream RNPDNO server behavior, not a local
+  caching or session bug — no code change indicated for either. The
+  muni-leak (entry 13) already has a hard stop; the total-magnitude
+  divergence itself is still unexplained (methodology difference in
+  México Evalúa's own figure, or a server-side state-filter bug deeper
+  than the municipio-name symptom — see caveat below) and stays open.
+- **Known caveat on entry 13's check:** `MunicipioProvenanceError` only
+  fires when a leaked name doesn't exist in the victim entidad's own
+  catalog. Many municipio names repeat across states (there is more
+  than one "INDEPENDENCIA", "PROGRESO", etc. in Mexico); a leak that
+  happens to land on such a name would join "successfully" to the
+  wrong municipio's code and pass silently. The provenance check is a
+  floor on this bug's visibility, not a ceiling on its extent — it
+  cannot be used to argue the leak is *only* ~41/6,732 slices.

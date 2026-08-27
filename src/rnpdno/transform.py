@@ -8,6 +8,10 @@ Municipio x sexo counts come from the cached TablaDetalle responses
 (complete municipio table). If a table's sum falls short of the
 corresponding Totales field, a MUNICIPIO NO DESGLOSADO residual row is
 added so totals still reconcile, and the fallback is logged to stderr.
+Every municipio name is also checked against that entidad's own
+CatalogoMunicipios: an unrecognized name is either the source's own
+SIN MUNICIPIO DE REFERENCIA bucket (legitimate) or a cross-entidad
+leak, and raises MunicipioProvenanceError.
 
 Also computes the per-state SIN_FECHA bucket: records without a fecha
 de hechos, per categoria, as Totales(mostrarFechaNula=1) minus
@@ -43,6 +47,12 @@ COLUMNS = [
 RESIDUAL_MUNICIPIO = "MUNICIPIO NO DESGLOSADO"
 SIN_FECHA_PERIODO = "SIN_FECHA"
 
+# TablaDetalle's own bucket for records it cannot pin to a municipio.
+# Unlike RESIDUAL_MUNICIPIO (synthesized here to patch a shortfall),
+# this label comes verbatim from the source and legitimately never
+# joins to a CatalogoMunicipios entry.
+SIN_MUNICIPIO_REFERENCIA = "SIN MUNICIPIO DE REFERENCIA"
+
 # TablaDetalle column header -> sexo value.
 SEXO_HEADERS = {"HOMBRES": "HOMBRE", "MUJERES": "MUJER",
                 "INDETERMINADO": "INDETERMINADO"}
@@ -52,7 +62,17 @@ class ReconciliationError(Exception):
     """Row sums do not match the dashboard's Totales for the slice."""
 
 
-def _parse_total(value: str) -> int:
+class MunicipioProvenanceError(Exception):
+    """A TablaDetalle row names a municipio outside its own entidad.
+
+    The row still counts toward this entidad's Totales (so
+    ReconciliationError stays silent), but the name doesn't exist in
+    this entidad's own cached CatalogoMunicipios — i.e. the server
+    answered a state-filtered request with another state's data.
+    """
+
+
+def parse_total(value: str) -> int:
     # Totales values are formatted strings like "04" or "3,514".
     return int(value.replace(",", ""))
 
@@ -79,6 +99,26 @@ def municipio_code_map(slice_dir: Path) -> dict:
         src = slice_dir
     catalog = _load(src, "CatalogoMunicipios")
     return {row["Text"].strip(): row["Value"] for row in catalog if row["Value"] != 0}
+
+
+def _municipio_cve(municipio: str, muni_codes: dict, *, id_estado: str,
+                    entidad: str, categoria: str, periodo: str) -> str:
+    """Join a TablaDetalle municipio name to its INEGI cve, or "".
+
+    Raises MunicipioProvenanceError if the name is neither in this
+    entidad's own catalog nor the source's SIN_MUNICIPIO_REFERENCIA
+    bucket — i.e. it belongs to some other entidad's catalog.
+    """
+    code = muni_codes.get(municipio)
+    if code is not None:
+        return cve_municipio(id_estado, code)
+    if municipio == SIN_MUNICIPIO_REFERENCIA:
+        return ""
+    raise MunicipioProvenanceError(
+        f"{municipio!r} not found in {entidad}'s own CatalogoMunicipios "
+        f"(estado={id_estado}, categoria={categoria}, periodo={periodo}); "
+        "likely a cross-entidad data leak from TablaDetalle"
+    )
 
 
 def parse_tabla_detalle(html: str) -> list[tuple[str, str, int]]:
@@ -121,20 +161,22 @@ def transform_slice(id_estado: str, periodo: str) -> list[dict]:
         consultado = _consultado_en(slice_dir, name)
         cat_rows = []
         for municipio, sexo, conteo in parse_tabla_detalle(detalle["Html"]):
-            code = muni_codes.get(municipio)
+            cve = _municipio_cve(municipio, muni_codes, id_estado=id_estado,
+                                  entidad=entidad, categoria=categoria,
+                                  periodo=periodo)
             cat_rows.append({
                 "cve_entidad": cve_entidad(id_estado),
                 "entidad": entidad,
                 "periodo": periodo,
                 "categoria": categoria,
                 "sexo": sexo,
-                "cve_municipio": cve_municipio(id_estado, code) if code else "",
+                "cve_municipio": cve,
                 "municipio": municipio,
                 "conteo": conteo,
                 "consultado_en": consultado,
             })
 
-        expected = _parse_total(totales[CATEGORIA_TOTALES_FIELD[categoria]])
+        expected = parse_total(totales[CATEGORIA_TOTALES_FIELD[categoria]])
         got = sum(r["conteo"] for r in cat_rows)
         if got < expected:
             # TablaDetalle did not carry the full count: keep totals
@@ -166,7 +208,7 @@ def transform_slice(id_estado: str, periodo: str) -> list[dict]:
         rows.extend(cat_rows)
 
     # Grand total must match TotalGlobal exactly.
-    expected = _parse_total(totales["TotalGlobal"])
+    expected = parse_total(totales["TotalGlobal"])
     got = sum(r["conteo"] for r in rows)
     if got != expected:
         raise ReconciliationError(
@@ -203,7 +245,7 @@ def sin_fecha_rows(id_estado: str, periodo: str) -> list[dict]:
     rows = []
     for categoria in CATEGORIAS:
         field = CATEGORIA_TOTALES_FIELD[categoria]
-        diff = _parse_total(con[field]) - _parse_total(sin[field])
+        diff = parse_total(con[field]) - parse_total(sin[field])
         if diff < 0:
             raise ReconciliationError(
                 f"SIN_FECHA {categoria}: negative diff {diff} "

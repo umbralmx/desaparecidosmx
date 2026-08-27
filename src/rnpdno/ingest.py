@@ -255,6 +255,28 @@ def ensure_state_cache(id_estado: str, mes: str,
         cache_response(d, name, resp, payload)
 
 
+NATIONAL_ESTADO = "0"
+
+
+def fetch_national_totales(fecha_inicio: str, fecha_fin: str,
+                           fetcher: Fetcher | None = None) -> dict:
+    """Fetch and cache the direct national Totales (idEstado=0) for a range.
+
+    Only used by rnpdno.validate's national cross-check invariant, not
+    part of the regular per-entidad ingest path — TablaDetalle at
+    national scope would return every municipio in the country, which
+    that check doesn't need.
+    """
+    payload = dict(DEFAULT_PAYLOAD, idEstado=NATIONAL_ESTADO,
+                   fechaInicio=fecha_inicio, fechaFin=fecha_fin)
+    slice_dir = state_dir(NATIONAL_ESTADO) / fecha_inicio[:7]
+    fetcher = fetcher or Fetcher()
+    print(f"POST {ENDPOINTS['Totales']} -> Totales (national)", file=sys.stderr)
+    resp = fetcher.post(ENDPOINTS["Totales"], payload)
+    cache_response(slice_dir, "Totales", resp, payload)
+    return resp.json()
+
+
 def fetch_slice(id_estado: str, fecha_inicio: str, fecha_fin: str,
                 fetcher: Fetcher | None = None) -> dict:
     """Fetch the per-month endpoints for one entidad x date range; cache raw.
