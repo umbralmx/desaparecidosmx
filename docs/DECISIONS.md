@@ -323,3 +323,64 @@ whenever a call of this kind is made; keep entries short.
   wrong municipio's code and pass silently. The provenance check is a
   floor on this bug's visibility, not a ceiling on its extent — it
   cannot be used to argue the leak is *only* ~41/6,732 slices.
+
+## 16. Dashboard rebuilt on Observable Framework, in modo laboratorio
+
+- **Problem:** The Streamlit dashboard cost too much to keep running.
+  Entry 12's framing was right, but the runtime was not. Three
+  symptoms drove the decision. Streamlit needs a live Python server
+  for a page that only reads static CSVs. The deployment pinned
+  `pyarrow==24.0.0` because pyarrow 25 segfaulted the hosted app
+  through three separate APIs. Every brand rule had to be re-applied
+  as CSS that fought Streamlit's own widgets.
+- **Decision:** Rebuild the three pages as an
+  [Observable Framework](https://observablehq.com/framework/) site.
+  The build writes static HTML, and every filter runs in the browser.
+  There is no server to keep alive and no Arrow dependency at
+  runtime. GitHub Actions publishes to GitHub Pages on push to
+  `main`.
+- **Sub-decisions:**
+  1. **The source root is `dashboard/`, not `src/`.** Framework
+     defaults to `src/`, which this repo already uses for the
+     `rnpdno` Python package. Pointing Framework at `src/` made it
+     try to build `src/rnpdno/README.md` as a page.
+  2. **The data loaders emit CSV, not parquet.**
+     `FileAttachment.parquet()` downloads 6.2 MB of `parquet-wasm` to
+     decode 0.5 MB of data. The CSV is 8.2 MB on disk and 744 KB over
+     the wire, because GitHub Pages serves it with gzip. CSV also
+     removes a runtime dependency. The loaders read every column as
+     text and cast only `conteo`, so INEGI keys keep their leading
+     zero.
+  3. **Two data files, not one.** `nacional.csv` drops the municipio
+     grain and holds 26,501 rows in 107 KB compressed. `municipios.csv`
+     keeps the full 138,835 rows. Panorama nacional never fetches the
+     large file, and Detalle por estado fetches it once and filters to
+     one entidad.
+  4. **The fonts are injected at runtime** by
+     `dashboard/components/fonts.js`. Framework's CSS bundler has no
+     loader for `.woff2`, so a `url()` to a font file in the main
+     stylesheet fails the build. `FileAttachment` serves any file and
+     returns the same hashed URL in `preview` and in `build`. The
+     cost is one font swap on first paint, which `font-display: swap`
+     and the fallback stack cover. The fonts stay self-hosted, which
+     is the point of UMB-TYP-005.
+  5. **`@umbralmx/umbral-plot` v1.3.0 is vendored** under `vendor/`
+     and installed as a `file:` dependency. The package is not
+     published to npm. It supplies the Plot theme, the token values
+     and the `Frame` class that throws when a chart has no source
+     (UMB-CHT-003), no title (UMB-CHT-001) or no subtitle
+     (UMB-CHT-002).
+  6. **The site is modo laboratorio (light), not instrumento.** This
+     is a deliberate deviation from the surface table in the style
+     guide, which assigns a live dashboard to instrumento. Two
+     reasons override it. This is a project micrositio on a
+     `umbral.org.mx` subdomain, and
+     `guide/14-superficies/web.md` puts that surface in laboratorio.
+     The visual idiom also has to match `umbral.org.mx` itself, which
+     is light. The mode is one attribute, so a later reversal costs
+     one line.
+- **Why:** Entry 12's decisions all survive the move. The monitor
+  stays descriptive. SIN_FECHA counts stay visible and stay out of
+  every dated series. The figures stay neutral, with no valenced
+  arrows. The per-100k toggle keeps its stated CONAPO vintage. What
+  changed is the runtime under those decisions, not the decisions.

@@ -1,0 +1,126 @@
+{
+  "$generated": "plotly-umbral-laboratorio.json — GENERATED from tokens/src/. Do not edit.\nUmbral design system · https://github.com/umbralmx/umbral-style-guide\nCode MIT · content CC BY 4.0",
+  "layout": {
+    "paper_bgcolor": "rgba(0,0,0,0)",
+    "plot_bgcolor": "rgba(0,0,0,0)",
+    "colorway": [
+      "#128273",
+      "#5a63d8",
+      "#565d57",
+      "#c8503f",
+      "#902a00",
+      "#6331a0"
+    ],
+    "font": {
+      "family": "IBM Plex Sans",
+      "color": "#16191c",
+      "size": 13
+    },
+    "title": {
+      "font": {
+        "family": "Space Grotesk",
+        "size": 22
+      },
+      "x": 0,
+      "xanchor": "left"
+    },
+    "xaxis": {
+      "showgrid": false,
+      "zeroline": false,
+      "linecolor": "#c4c9c4",
+      "tickfont": {
+        "family": "IBM Plex Mono",
+        "size": 12,
+        "color": "#6c706d"
+      }
+    },
+    "yaxis": {
+      "showgrid": true,
+      "gridcolor": "#e6e8e4",
+      "zerolinecolor": "#c4c9c4",
+      "linewidth": 0,
+      "tickfont": {
+        "family": "IBM Plex Mono",
+        "size": 12,
+        "color": "#6c706d"
+      }
+    },
+    "showlegend": false,
+    "margin": {
+      "l": 52,
+      "b": 34,
+      "t": 64,
+      "r": 24
+    },
+    "colorscale": {
+      "sequential": [
+        [
+          0,
+          "#eaf5f2"
+        ],
+        [
+          0.16666666666666666,
+          "#c1d9d4"
+        ],
+        [
+          0.3333333333333333,
+          "#98bfb6"
+        ],
+        [
+          0.5,
+          "#6fa59a"
+        ],
+        [
+          0.6666666666666666,
+          "#448b7e"
+        ],
+        [
+          0.8333333333333334,
+          "#007264"
+        ],
+        [
+          1,
+          "#00544a"
+        ]
+      ],
+      "diverging": [
+        [
+          0,
+          "#942316"
+        ],
+        [
+          0.125,
+          "#b05b4d"
+        ],
+        [
+          0.25,
+          "#ca8c81"
+        ],
+        [
+          0.375,
+          "#e0bdb6"
+        ],
+        [
+          0.5,
+          "#f4efee"
+        ],
+        [
+          0.625,
+          "#b2cdc7"
+        ],
+        [
+          0.75,
+          "#79a99f"
+        ],
+        [
+          0.875,
+          "#3c8679"
+        ],
+        [
+          1,
+          "#006155"
+        ]
+      ]
+    }
+  }
+}

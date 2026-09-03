@@ -1,0 +1,40 @@
+{
+  "name": "@umbralmx/umbral-plot",
+  "version": "1.3.0",
+  "description": "The Umbral design system for Observable Plot \u2014 theme, chart frame and uncertainty helpers",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./tokens": "./src/tokens.js",
+    "./dist/umbral.css": "./dist/umbral.css"
+  },
+  "files": [
+    "src",
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "umbral",
+    "observable-plot",
+    "data-visualization",
+    "design-system"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/umbralmx/umbral-style-guide.git",
+    "directory": "packages/umbral-plot"
+  },
+  "peerDependencies": {
+    "@observablehq/plot": ">=0.6"
+  },
+  "peerDependenciesMeta": {
+    "@observablehq/plot": {
+      "optional": true
+    }
+  },
+  "sideEffects": [
+    "*.css"
+  ]
+}
