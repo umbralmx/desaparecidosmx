@@ -1,0 +1,66 @@
+# Construye el tablero de Observable Framework y lo publica en GitHub Pages.
+#
+# Los cargadores de datos (dashboard/data/*.csv.py) leen data/processed/,
+# que vive en el repositorio, así que el build no toca la red ni el
+# RNPDNO. Re-escrapear es un trabajo aparte (scripts/scrape_vintage.py).
+name: Deploy dashboard
+
+on:
+  push:
+    branches: [main]
+    # Solo cuando cambia algo que entra en el sitio.
+    paths:
+      - "dashboard/**"
+      - "vendor/**"
+      - "data/processed/**"
+      - "data/reference/**"
+      - "observablehq.config.js"
+      - "package.json"
+      - "package-lock.json"
+      - "scripts/copy-static.mjs"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch: {}
+
+# Un despliegue a la vez; no cancela el que ya está corriendo.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

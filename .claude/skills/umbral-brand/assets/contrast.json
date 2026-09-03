@@ -1,0 +1,896 @@
+{
+  "$generated": "contrast.json — GENERATED from tokens/src/. Do not edit.\nUmbral design system · https://github.com/umbralmx/umbral-style-guide\nCode MIT · content CC BY 4.0",
+  "thresholds": {
+    "text": 4.5,
+    "mark": 3
+  },
+  "modes": {
+    "laboratorio": [
+      {
+        "token": "ink",
+        "on": "base",
+        "fg": "#16191c",
+        "bg": "#f2f3f1",
+        "role": "text",
+        "ratio": 15.85,
+        "threshold": 4.5,
+        "pass": true
+      },
+      {
+        "token": "ink",
+        "on": "panel",
+        "fg": "#16191c",
+        "bg": "#fafaf8",
+        "role": "text",
+        "ratio": 16.88,
+        "threshold": 4.5,
+        "pass": true
+      },
+      {
+        "token": "muted",
+        "on": "base",
+        "fg": "#565d57",
+        "bg": "#f2f3f1",
+        "role": "text",
+        "ratio": 6.08,
+        "threshold": 4.5,
+        "pass": true
+      },
+      {
+        "token": "muted",
+        "on": "panel",
+        "fg": "#565d57",
+        "bg": "#fafaf8",
+        "role": "text",
+        "ratio": 6.48,
+        "threshold": 4.5,
+        "pass": true
+      },
+      {
+        "token": "caption",
+        "on": "base",
+        "fg": "#6c706d",
+        "bg": "#f2f3f1",
+        "role": "text",
+        "ratio": 4.51,
+        "threshold": 4.5,
+        "pass": true
+      },
+      {
+        "token": "caption",
+        "on": "panel",
+        "fg": "#6c706d",
+        "bg": "#fafaf8",
+        "role": "text",
+        "ratio": 4.81,
+        "threshold": 4.5,
+        "pass": true
+      },
+      {
+        "token": "border",
+        "on": "base",
+        "fg": "#dde0dc",
+        "bg": "#f2f3f1",
+        "role": "furniture",
+        "ratio": 1.19,
+        "threshold": null,
+        "pass": null
+      },
+      {
+        "token": "border",
+        "on": "panel",
+        "fg": "#dde0dc",
+        "bg": "#fafaf8",
+        "role": "furniture",
+        "ratio": 1.27,
+        "threshold": null,
+        "pass": null
+      },
+      {
+        "token": "gridline",
+        "on": "base",
+        "fg": "#e6e8e4",
+        "bg": "#f2f3f1",
+        "role": "furniture",
+        "ratio": 1.1,
+        "threshold": null,
+        "pass": null
+      },
+      {
+        "token": "gridline",
+        "on": "panel",
+        "fg": "#e6e8e4",
+        "bg": "#fafaf8",
+        "role": "furniture",
+        "ratio": 1.18,
+        "threshold": null,
+        "pass": null
+      },
+      {
+        "token": "baseline",
+        "on": "base",
+        "fg": "#c4c9c4",
+        "bg": "#f2f3f1",
+        "role": "furniture",
+        "ratio": 1.5,
+        "threshold": null,
+        "pass": null
+      },
+      {
+        "token": "baseline",
+        "on": "panel",
+        "fg": "#c4c9c4",
+        "bg": "#fafaf8",
+        "role": "furniture",
+        "ratio": 1.6,
+        "threshold": null,
+        "pass": null
+      },
+      {
+        "token": "signal",
+        "on": "base",
+        "fg": "#128273",
+        "bg": "#f2f3f1",
+        "role": "mark",
+        "ratio": 4.22,
+        "threshold": 3,
+        "pass": true
+      },
+      {
+        "token": "signal",
+        "on": "panel",
+        "fg": "#128273",
+        "bg": "#fafaf8",
+        "role": "mark",
+        "ratio": 4.49,
+        "threshold": 3,
+        "pass": true
+      },
+      {
+        "token": "signal-text",
+        "on": "base",
+        "fg": "#227c6f",
+        "bg": "#f2f3f1",
+        "role": "text",
+        "ratio": 4.51,
+        "threshold": 4.5,
+        "pass": true
+      },
+      {
+        "token": "signal-text",
+        "on": "panel",
+        "fg": "#227c6f",
+        "bg": "#fafaf8",
+        "role": "text",
+        "ratio": 4.8,
+        "threshold": 4.5,
+        "pass": true
+      },
+      {
+        "token": "model",
+        "on": "base",
+        "fg": "#5a63d8",
+        "bg": "#f2f3f1",
+        "role": "mark",
+        "ratio": 4.48,
+        "threshold": 3,
+        "pass": true
+      },
+      {
+        "token": "model",
+        "on": "panel",
+        "fg": "#5a63d8",
+        "bg": "#fafaf8",
+        "role": "mark",
+        "ratio": 4.77,
+        "threshold": 3,
+        "pass": true
+      },
+      {
+        "token": "model-text",
+        "on": "base",
+        "fg": "#5962d7",
+        "bg": "#f2f3f1",
+        "role": "text",
+        "ratio": 4.54,
+        "threshold": 4.5,
+        "pass": true
+      },
+      {
+        "token": "model-text",
+        "on": "panel",
+        "fg": "#5962d7",
+        "bg": "#fafaf8",
+        "role": "text",
+        "ratio": 4.83,
+        "threshold": 4.5,
+        "pass": true
+      },
+      {
+        "token": "alert",
+        "on": "base",
+        "fg": "#c8503f",
+        "bg": "#f2f3f1",
+        "role": "mark",
+        "ratio": 4.03,
+        "threshold": 3,
+        "pass": true
+      },
+      {
+        "token": "alert",
+        "on": "panel",
+        "fg": "#c8503f",
+        "bg": "#fafaf8",
+        "role": "mark",
+        "ratio": 4.29,
+        "threshold": 3,
+        "pass": true
+      },
+      {
+        "token": "alert-text",
+        "on": "base",
+        "fg": "#be4737",
+        "bg": "#f2f3f1",
+        "role": "text",
+        "ratio": 4.55,
+        "threshold": 4.5,
+        "pass": true
+      },
+      {
+        "token": "alert-text",
+        "on": "panel",
+        "fg": "#be4737",
+        "bg": "#fafaf8",
+        "role": "text",
+        "ratio": 4.84,
+        "threshold": 4.5,
+        "pass": true
+      },
+      {
+        "token": "series-4",
+        "on": "base",
+        "fg": "#902a00",
+        "bg": "#f2f3f1",
+        "role": "mark",
+        "ratio": 7.49,
+        "threshold": 3,
+        "pass": true
+      },
+      {
+        "token": "series-4",
+        "on": "panel",
+        "fg": "#902a00",
+        "bg": "#fafaf8",
+        "role": "mark",
+        "ratio": 7.98,
+        "threshold": 3,
+        "pass": true
+      },
+      {
+        "token": "series-5",
+        "on": "base",
+        "fg": "#6331a0",
+        "bg": "#f2f3f1",
+        "role": "mark",
+        "ratio": 7.61,
+        "threshold": 3,
+        "pass": true
+      },
+      {
+        "token": "series-5",
+        "on": "panel",
+        "fg": "#6331a0",
+        "bg": "#fafaf8",
+        "role": "mark",
+        "ratio": 8.11,
+        "threshold": 3,
+        "pass": true
+      },
+      {
+        "token": "missing",
+        "on": "base",
+        "fg": "#e3e5e1",
+        "bg": "#f2f3f1",
+        "role": "furniture",
+        "ratio": 1.13,
+        "threshold": null,
+        "pass": null
+      },
+      {
+        "token": "missing",
+        "on": "panel",
+        "fg": "#e3e5e1",
+        "bg": "#fafaf8",
+        "role": "furniture",
+        "ratio": 1.21,
+        "threshold": null,
+        "pass": null
+      }
+    ],
+    "instrumento": [
+      {
+        "token": "ink",
+        "on": "base",
+        "fg": "#edf1f4",
+        "bg": "#101418",
+        "role": "text",
+        "ratio": 16.28,
+        "threshold": 4.5,
+        "pass": true
+      },
+      {
+        "token": "ink",
+        "on": "panel",
+        "fg": "#edf1f4",
+        "bg": "#171c22",
+        "role": "text",
+        "ratio": 15.08,
+        "threshold": 4.5,
+        "pass": true
+      },
+      {
+        "token": "muted",
+        "on": "base",
+        "fg": "#8b95a0",
+        "bg": "#101418",
+        "role": "text",
+        "ratio": 6.08,
+        "threshold": 4.5,
+        "pass": true
+      },
+      {
+        "token": "muted",
+        "on": "panel",
+        "fg": "#8b95a0",
+        "bg": "#171c22",
+        "role": "text",
+        "ratio": 5.63,
+        "threshold": 4.5,
+        "pass": true
+      },
+      {
+        "token": "caption",
+        "on": "base",
+        "fg": "#7a848f",
+        "bg": "#101418",
+        "role": "text",
+        "ratio": 4.86,
+        "threshold": 4.5,
+        "pass": true
+      },
+      {
+        "token": "caption",
+        "on": "panel",
+        "fg": "#7a848f",
+        "bg": "#171c22",
+        "role": "text",
+        "ratio": 4.5,
+        "threshold": 4.5,
+        "pass": true
+      },
+      {
+        "token": "border",
+        "on": "base",
+        "fg": "#2a3138",
+        "bg": "#101418",
+        "role": "furniture",
+        "ratio": 1.4,
+        "threshold": null,
+        "pass": null
+      },
+      {
+        "token": "border",
+        "on": "panel",
+        "fg": "#2a3138",
+        "bg": "#171c22",
+        "role": "furniture",
+        "ratio": 1.3,
+        "threshold": null,
+        "pass": null
+      },
+      {
+        "token": "gridline",
+        "on": "base",
+        "fg": "#232a31",
+        "bg": "#101418",
+        "role": "furniture",
+        "ratio": 1.27,
+        "threshold": null,
+        "pass": null
+      },
+      {
+        "token": "gridline",
+        "on": "panel",
+        "fg": "#232a31",
+        "bg": "#171c22",
+        "role": "furniture",
+        "ratio": 1.18,
+        "threshold": null,
+        "pass": null
+      },
+      {
+        "token": "baseline",
+        "on": "base",
+        "fg": "#3a434c",
+        "bg": "#101418",
+        "role": "furniture",
+        "ratio": 1.83,
+        "threshold": null,
+        "pass": null
+      },
+      {
+        "token": "baseline",
+        "on": "panel",
+        "fg": "#3a434c",
+        "bg": "#171c22",
+        "role": "furniture",
+        "ratio": 1.7,
+        "threshold": null,
+        "pass": null
+      },
+      {
+        "token": "signal",
+        "on": "base",
+        "fg": "#5fd4c4",
+        "bg": "#101418",
+        "role": "mark",
+        "ratio": 10.3,
+        "threshold": 3,
+        "pass": true
+      },
+      {
+        "token": "signal",
+        "on": "panel",
+        "fg": "#5fd4c4",
+        "bg": "#171c22",
+        "role": "mark",
+        "ratio": 9.54,
+        "threshold": 3,
+        "pass": true
+      },
+      {
+        "token": "signal-text",
+        "on": "base",
+        "fg": "#5fd4c4",
+        "bg": "#101418",
+        "role": "text",
+        "ratio": 10.3,
+        "threshold": 4.5,
+        "pass": true
+      },
+      {
+        "token": "signal-text",
+        "on": "panel",
+        "fg": "#5fd4c4",
+        "bg": "#171c22",
+        "role": "text",
+        "ratio": 9.54,
+        "threshold": 4.5,
+        "pass": true
+      },
+      {
+        "token": "model",
+        "on": "base",
+        "fg": "#8b93f8",
+        "bg": "#101418",
+        "role": "mark",
+        "ratio": 6.71,
+        "threshold": 3,
+        "pass": true
+      },
+      {
+        "token": "model",
+        "on": "panel",
+        "fg": "#8b93f8",
+        "bg": "#171c22",
+        "role": "mark",
+        "ratio": 6.22,
+        "threshold": 3,
+        "pass": true
+      },
+      {
+        "token": "model-text",
+        "on": "base",
+        "fg": "#8b93f8",
+        "bg": "#101418",
+        "role": "text",
+        "ratio": 6.71,
+        "threshold": 4.5,
+        "pass": true
+      },
+      {
+        "token": "model-text",
+        "on": "panel",
+        "fg": "#8b93f8",
+        "bg": "#171c22",
+        "role": "text",
+        "ratio": 6.22,
+        "threshold": 4.5,
+        "pass": true
+      },
+      {
+        "token": "alert",
+        "on": "base",
+        "fg": "#e26a5a",
+        "bg": "#101418",
+        "role": "mark",
+        "ratio": 5.67,
+        "threshold": 3,
+        "pass": true
+      },
+      {
+        "token": "alert",
+        "on": "panel",
+        "fg": "#e26a5a",
+        "bg": "#171c22",
+        "role": "mark",
+        "ratio": 5.25,
+        "threshold": 3,
+        "pass": true
+      },
+      {
+        "token": "alert-text",
+        "on": "base",
+        "fg": "#e26a5a",
+        "bg": "#101418",
+        "role": "text",
+        "ratio": 5.67,
+        "threshold": 4.5,
+        "pass": true
+      },
+      {
+        "token": "alert-text",
+        "on": "panel",
+        "fg": "#e26a5a",
+        "bg": "#171c22",
+        "role": "text",
+        "ratio": 5.25,
+        "threshold": 4.5,
+        "pass": true
+      },
+      {
+        "token": "series-4",
+        "on": "base",
+        "fg": "#ffce2c",
+        "bg": "#101418",
+        "role": "mark",
+        "ratio": 12.43,
+        "threshold": 3,
+        "pass": true
+      },
+      {
+        "token": "series-4",
+        "on": "panel",
+        "fg": "#ffce2c",
+        "bg": "#171c22",
+        "role": "mark",
+        "ratio": 11.51,
+        "threshold": 3,
+        "pass": true
+      },
+      {
+        "token": "series-5",
+        "on": "base",
+        "fg": "#b454b3",
+        "bg": "#101418",
+        "role": "mark",
+        "ratio": 4.28,
+        "threshold": 3,
+        "pass": true
+      },
+      {
+        "token": "series-5",
+        "on": "panel",
+        "fg": "#b454b3",
+        "bg": "#171c22",
+        "role": "mark",
+        "ratio": 3.96,
+        "threshold": 3,
+        "pass": true
+      },
+      {
+        "token": "missing",
+        "on": "base",
+        "fg": "#1d242b",
+        "bg": "#101418",
+        "role": "furniture",
+        "ratio": 1.17,
+        "threshold": null,
+        "pass": null
+      },
+      {
+        "token": "missing",
+        "on": "panel",
+        "fg": "#1d242b",
+        "bg": "#171c22",
+        "role": "furniture",
+        "ratio": 1.09,
+        "threshold": null,
+        "pass": null
+      }
+    ]
+  },
+  "cvd": {
+    "laboratorio": [
+      {
+        "a": "signal",
+        "b": "model",
+        "normal": 0.208,
+        "protanopia": 0.189,
+        "deuteranopia": 0.171,
+        "tritanopia": 0.014,
+        "worst": 0.014
+      },
+      {
+        "a": "signal",
+        "b": "muted",
+        "normal": 0.113,
+        "protanopia": 0.107,
+        "deuteranopia": 0.075,
+        "tritanopia": 0.201,
+        "worst": 0.075
+      },
+      {
+        "a": "signal",
+        "b": "alert",
+        "normal": 0.247,
+        "protanopia": 0.089,
+        "deuteranopia": 0.119,
+        "tritanopia": 0.361,
+        "worst": 0.089
+      },
+      {
+        "a": "signal",
+        "b": "series-4",
+        "normal": 0.25,
+        "protanopia": 0.23,
+        "deuteranopia": 0.145,
+        "tritanopia": 0.318,
+        "worst": 0.145
+      },
+      {
+        "a": "signal",
+        "b": "series-5",
+        "normal": 0.255,
+        "protanopia": 0.242,
+        "deuteranopia": 0.171,
+        "tritanopia": 0.255,
+        "worst": 0.171
+      },
+      {
+        "a": "model",
+        "b": "muted",
+        "normal": 0.203,
+        "protanopia": 0.203,
+        "deuteranopia": 0.204,
+        "tritanopia": 0.188,
+        "worst": 0.188
+      },
+      {
+        "a": "model",
+        "b": "alert",
+        "normal": 0.283,
+        "protanopia": 0.239,
+        "deuteranopia": 0.28,
+        "tritanopia": 0.354,
+        "worst": 0.239
+      },
+      {
+        "a": "model",
+        "b": "series-4",
+        "normal": 0.304,
+        "protanopia": 0.321,
+        "deuteranopia": 0.296,
+        "tritanopia": 0.307,
+        "worst": 0.296
+      },
+      {
+        "a": "model",
+        "b": "series-5",
+        "normal": 0.137,
+        "protanopia": 0.148,
+        "deuteranopia": 0.119,
+        "tritanopia": 0.241,
+        "worst": 0.119
+      },
+      {
+        "a": "muted",
+        "b": "alert",
+        "normal": 0.2,
+        "protanopia": 0.058,
+        "deuteranopia": 0.155,
+        "tritanopia": 0.259,
+        "worst": 0.058
+      },
+      {
+        "a": "muted",
+        "b": "series-4",
+        "normal": 0.152,
+        "protanopia": 0.132,
+        "deuteranopia": 0.094,
+        "tritanopia": 0.144,
+        "worst": 0.094
+      },
+      {
+        "a": "muted",
+        "b": "series-5",
+        "normal": 0.184,
+        "protanopia": 0.181,
+        "deuteranopia": 0.155,
+        "tritanopia": 0.06,
+        "worst": 0.06
+      },
+      {
+        "a": "alert",
+        "b": "series-4",
+        "normal": 0.149,
+        "protanopia": 0.145,
+        "deuteranopia": 0.148,
+        "tritanopia": 0.157,
+        "worst": 0.145
+      },
+      {
+        "a": "alert",
+        "b": "series-5",
+        "normal": 0.275,
+        "protanopia": 0.237,
+        "deuteranopia": 0.288,
+        "tritanopia": 0.282,
+        "worst": 0.237
+      },
+      {
+        "a": "series-4",
+        "b": "series-5",
+        "normal": 0.238,
+        "protanopia": 0.243,
+        "deuteranopia": 0.242,
+        "tritanopia": 0.14,
+        "worst": 0.14
+      }
+    ],
+    "instrumento": [
+      {
+        "a": "signal",
+        "b": "model",
+        "normal": 0.214,
+        "protanopia": 0.208,
+        "deuteranopia": 0.163,
+        "tritanopia": 0.076,
+        "worst": 0.076
+      },
+      {
+        "a": "signal",
+        "b": "muted",
+        "normal": 0.168,
+        "protanopia": 0.172,
+        "deuteranopia": 0.131,
+        "tritanopia": 0.117,
+        "worst": 0.117
+      },
+      {
+        "a": "signal",
+        "b": "alert",
+        "normal": 0.287,
+        "protanopia": 0.257,
+        "deuteranopia": 0.165,
+        "tritanopia": 0.286,
+        "worst": 0.165
+      },
+      {
+        "a": "signal",
+        "b": "series-4",
+        "normal": 0.218,
+        "protanopia": 0.163,
+        "deuteranopia": 0.213,
+        "tritanopia": 0.347,
+        "worst": 0.163
+      },
+      {
+        "a": "signal",
+        "b": "series-5",
+        "normal": 0.333,
+        "protanopia": 0.324,
+        "deuteranopia": 0.206,
+        "tritanopia": 0.295,
+        "worst": 0.206
+      },
+      {
+        "a": "model",
+        "b": "muted",
+        "normal": 0.134,
+        "protanopia": 0.134,
+        "deuteranopia": 0.133,
+        "tritanopia": 0.107,
+        "worst": 0.107
+      },
+      {
+        "a": "model",
+        "b": "alert",
+        "normal": 0.25,
+        "protanopia": 0.231,
+        "deuteranopia": 0.243,
+        "tritanopia": 0.325,
+        "worst": 0.231
+      },
+      {
+        "a": "model",
+        "b": "series-4",
+        "normal": 0.357,
+        "protanopia": 0.348,
+        "deuteranopia": 0.373,
+        "tritanopia": 0.41,
+        "worst": 0.348
+      },
+      {
+        "a": "model",
+        "b": "series-5",
+        "normal": 0.168,
+        "protanopia": 0.163,
+        "deuteranopia": 0.118,
+        "tritanopia": 0.306,
+        "worst": 0.118
+      },
+      {
+        "a": "muted",
+        "b": "alert",
+        "normal": 0.168,
+        "protanopia": 0.109,
+        "deuteranopia": 0.113,
+        "tritanopia": 0.233,
+        "worst": 0.109
+      },
+      {
+        "a": "muted",
+        "b": "series-4",
+        "normal": 0.278,
+        "protanopia": 0.257,
+        "deuteranopia": 0.291,
+        "tritanopia": 0.346,
+        "worst": 0.257
+      },
+      {
+        "a": "muted",
+        "b": "series-5",
+        "normal": 0.18,
+        "protanopia": 0.163,
+        "deuteranopia": 0.09,
+        "tritanopia": 0.2,
+        "worst": 0.09
+      },
+      {
+        "a": "alert",
+        "b": "series-4",
+        "normal": 0.262,
+        "protanopia": 0.283,
+        "deuteranopia": 0.222,
+        "tritanopia": 0.163,
+        "worst": 0.163
+      },
+      {
+        "a": "alert",
+        "b": "series-5",
+        "normal": 0.179,
+        "protanopia": 0.177,
+        "deuteranopia": 0.19,
+        "tritanopia": 0.119,
+        "worst": 0.119
+      },
+      {
+        "a": "series-4",
+        "b": "series-5",
+        "normal": 0.402,
+        "protanopia": 0.419,
+        "deuteranopia": 0.381,
+        "tritanopia": 0.282,
+        "worst": 0.282
+      }
+    ]
+  },
+  "summary": {
+    "pairsChecked": 44,
+    "failures": 0,
+    "exempt": 8,
+    "worstSeriesSeparation": 0.014,
+    "note": "furniture-role tokens are exempt by assertion — see audit/open-questions.md OQ-001"
+  }
+}

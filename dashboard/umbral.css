@@ -1,0 +1,612 @@
+/* umbral_ · monitor del RNPDNO — modo laboratorio.
+ *
+ * Idioma visual mínimo de umbral.org.mx, aplicado sobre el armazón de
+ * Observable Framework: retícula de puntos en el margen exterior, hoja de
+ * contenido encima, etiquetas mono en minúsculas y reglas de 1px haciendo
+ * el trabajo estructural (guide/04-layout.md, v1.3.0).
+ *
+ * Todo el color sale de tokens.css. Aquí no se escribe ningún hex.
+ */
+
+@import url("observablehq:default.css");
+@import url("./assets/tokens.css");
+
+/* ── Fuentes ────────────────────────────────────────────────────────
+   Las @font-face viven en assets/fonts.css, cargada con <link> desde la
+   configuración: el empaquetador de CSS no tiene cargador para .woff2.
+   Ver UMB-TYP-005 y el encabezado de esa hoja. */
+
+/* ── Framework → tokens ─────────────────────────────────────────────
+   Framework dibuja su armazón con --theme-*. Se reasignan a los tokens
+   para que sus propias piezas (Inputs, tablas, código) hereden la marca
+   en vez de competir con ella. */
+
+:root {
+  --theme-background: var(--u-base);
+  --theme-background-a: var(--u-base);
+  --theme-background-b: var(--u-panel);
+  --theme-background-alt: var(--u-panel);
+  --theme-foreground: var(--u-ink);
+  --theme-foreground-alt: var(--u-ink);
+  --theme-foreground-muted: var(--u-muted);
+  --theme-foreground-faint: var(--u-baseline);
+  --theme-foreground-fainter: var(--u-border);
+  --theme-foreground-faintest: var(--u-gridline);
+  --theme-foreground-focus: var(--u-signal-text);
+
+  --serif: var(--u-font-body);
+  --sans-serif: var(--u-font-body);
+  --monospace: var(--u-font-mono);
+  --monospace-font: 13px/1.5 var(--u-font-mono);
+
+  --observablehq-max-width: 1200px;
+  --u-edge: 32px;
+  --u-sheet: 1200px;
+  --u-column: 1080px;
+}
+
+/* ── Retícula de puntos ─────────────────────────────────────────────
+   UMB-LAY-009. Vive detrás de la página, en el margen exterior. La hoja
+   la tapa con `base`, así que nunca queda debajo de texto, de una tabla
+   ni de una gráfica: no cambia ningún contraste medido. En pantallas
+   estrechas no hay margen que llenar y se apaga. */
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(var(--u-baseline) 1px, transparent 1.6px);
+  background-size: 22px 22px;
+  opacity: 0.55;
+}
+
+@media (max-width: 1240px) {
+  body::before { display: none; }
+}
+
+/* ── Hoja y columna ─────────────────────────────────────────────────
+   La hoja sostiene el contenido sobre `base` y recorta la retícula al
+   centro. La columna de lectura se queda en la medida de 65ch para la
+   prosa (UMB-LAY-003); las gráficas pueden salirse de ella. */
+
+html { background: var(--u-base); }
+
+body {
+  max-width: none;
+  margin: 0;
+  font: 17px/1.6 var(--u-font-body);
+  color: var(--u-ink);
+  background: transparent;
+}
+
+#observablehq-center {
+  position: relative;
+  z-index: 1;
+  margin: 0 auto;
+  padding: 0 var(--u-edge);
+  max-width: var(--u-sheet);
+  background: var(--u-base);
+}
+
+#observablehq-main {
+  max-width: var(--u-column);
+  margin: 0 auto;
+  padding-bottom: 24px;
+}
+
+@media (max-width: 720px) {
+  :root { --u-edge: 20px; }
+}
+
+/* ── Tipografía ─────────────────────────────────────────────────────
+   Display en Space Grotesk 500, nunca 700 (UMB-TYP-001). El piso de
+   tamaño es 12px (UMB-TYP-003). */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--u-font-display);
+  font-weight: var(--u-weight-display);
+  letter-spacing: var(--u-tracking-display);
+  color: var(--u-ink);
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: clamp(30px, 4.4vw, 46px);
+  line-height: 1.16;
+  max-width: 22ch;
+  margin: 0 0 16px;
+}
+
+h2 { font-size: 26px; line-height: 1.2; margin: 0 0 8px; }
+h3 { font-size: 21px; line-height: 1.25; margin: 0 0 8px; }
+
+/* Framework italiciza el h2 que sigue a un h1 y lo trata como bajada.
+   Aquí la bajada es .u-standfirst y se escribe a mano. */
+h1 + h2 { font-style: normal; font-size: 26px; }
+
+p { max-width: var(--u-measure); }
+
+/* Framework limita p, table, figure, figcaption y los encabezados a
+   640px. La medida de 65ch (UMB-LAY-003) gobierna la prosa, pero una
+   gráfica, su tabla y su línea de fuente ocupan la columna entera. */
+figure, figcaption, table, ol.u-caveats { max-width: none; }
+
+a[href] { color: var(--u-signal-text); text-underline-offset: 2px; }
+a[href]:hover { text-decoration-thickness: 2px; }
+
+:focus-visible {
+  outline: 2px solid var(--u-signal);
+  outline-offset: 3px;
+}
+
+code, pre, kbd, samp { font-family: var(--u-font-mono); }
+
+/* ── Marca ──────────────────────────────────────────────────────────
+   Sin barra de encabezado. La marca va al principio del contenido,
+   alineada con el titular (guide/14-superficies/landing.md). */
+
+.u-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  margin: clamp(28px, 5vh, 44px) 0 clamp(32px, 6vh, 56px);
+  text-decoration: none;
+}
+.u-brand img { display: block; height: 24px; width: auto; }
+.u-brand .u-wordmark {
+  font-family: var(--u-font-display);
+  font-weight: var(--u-weight-display);
+  letter-spacing: var(--u-tracking-display);
+  font-size: 20px;
+  color: var(--u-ink);
+}
+.u-brand .u-wordmark span { color: var(--u-signal-text); }
+
+/* ── Navegación de tres páginas ─────────────────────────────────────
+   UMB-LAY-008: mono, borde de 1px, a signal al enfocarse. La página
+   activa lleva el texto en signal-text; nunca solo el color: además
+   marca aria-current, que el lector de pantalla sí anuncia
+   (UMB-A11Y-005). */
+
+.u-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 clamp(36px, 6vh, 64px);
+  padding: 0 0 20px;
+  border-bottom: var(--u-rule) solid var(--u-border);
+}
+.u-nav a {
+  display: inline-block;
+  padding: 8px 14px;
+  font-family: var(--u-font-mono);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--u-ink);
+  text-decoration: none;
+  border: var(--u-rule) solid var(--u-baseline);
+  border-radius: var(--u-radius-max);
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+.u-nav a:hover { border-color: var(--u-signal); color: var(--u-signal-text); }
+.u-nav a[aria-current="page"] {
+  border-color: var(--u-signal);
+  color: var(--u-signal-text);
+}
+.u-nav a[aria-current="page"]::before {
+  content: "· ";
+  color: var(--u-signal-text);
+}
+
+/* ── Etiqueta de sección ────────────────────────────────────────────
+   UMB-LAY-006: mono, minúsculas, en caption. Nombra la sección y no
+   compite con el contenido. */
+
+.u-label {
+  font-family: var(--u-font-mono);
+  font-weight: var(--u-weight-mono);
+  font-size: 13px;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  text-transform: lowercase;
+  color: var(--u-caption);
+  margin: 0 0 14px;
+}
+
+.u-section {
+  margin: 0 0 clamp(48px, 8vh, 88px);
+  padding-top: clamp(24px, 4vh, 40px);
+  border-top: var(--u-rule) solid var(--u-border);
+}
+.u-section:first-of-type { border-top: 0; padding-top: 0; }
+
+.u-standfirst {
+  font-size: 17px;
+  color: var(--u-muted);
+  max-width: var(--u-measure);
+  margin: 0 0 clamp(32px, 5vh, 48px);
+}
+
+/* ── Controles ──────────────────────────────────────────────────────
+   UMB-LAY-008. Rectángulo de 1px sin relleno; el estado activo mueve
+   borde y texto a signal. El área táctil llega a 44px aunque el borde
+   visible mida menos (guide/11-accesibilidad.md).
+
+   Observable Inputs dibuja cada control como un <form class="inputs-…">
+   con la etiqueta al lado. El sufijo de la clase cambia en cada build,
+   así que estas reglas apuntan a la estructura, no al nombre. */
+
+.u-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px 36px;
+  align-items: flex-start;
+  margin: 0 0 32px;
+}
+
+/* Cada campo es una columna: etiqueta arriba, control abajo. */
+.u-controls form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  width: auto;
+  max-width: none;
+  margin: 0;
+  font-family: var(--u-font-mono);
+  font-size: 13px;
+}
+
+/* La etiqueta del campo: mono, versalitas, en caption. */
+.u-controls form > label {
+  width: auto;
+  padding: 0;
+  font-family: var(--u-font-mono);
+  font-size: 12px;
+  font-weight: var(--u-weight-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--u-caption);
+}
+
+.u-controls select,
+.u-controls input[type="text"],
+.u-controls input[type="search"] {
+  min-height: 40px;
+  min-width: 168px;
+  padding: 6px 10px;
+  font-family: var(--u-font-mono);
+  font-size: 13px;
+  color: var(--u-ink);
+  background: transparent;
+  border: var(--u-rule) solid var(--u-baseline);
+  border-radius: var(--u-radius-max);
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+.u-controls select:hover,
+.u-controls input[type="text"]:hover {
+  border-color: var(--u-signal);
+  color: var(--u-signal-text);
+}
+
+/* Grupo de casillas: las opciones en fila, envolviendo. */
+.u-controls form > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  max-width: 44ch;
+}
+.u-controls form > div > label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  /* 44px de área táctil aunque la casilla mida 16 (UMB-A11Y-006). */
+  min-height: 44px;
+  font-family: var(--u-font-body);
+  font-size: 14px;
+  color: var(--u-ink);
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.u-controls input[type="checkbox"],
+.u-controls input[type="radio"] {
+  accent-color: var(--u-signal);
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+/* El interruptor suelto (una sola casilla, sin grupo) va en línea. */
+.u-controls form:has(> label + input[type="checkbox"]) {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+}
+.u-controls form:has(> label + input[type="checkbox"]) > label {
+  order: 2;
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--u-font-body);
+  font-size: 14px;
+  color: var(--u-ink);
+}
+
+/* Botón secundario: descarga de CSV, enlaces de datos.
+   El selector lleva `a[href]` porque la regla de enlaces tiene esa misma
+   especificidad: sin ella, cada botón heredaría `signal-text` y la vista
+   acabaría con veinte elementos en señal en vez de uno (UMB-COL-004). */
+a[href].u-btn,
+button.u-btn,
+.u-btn {
+  display: inline-block;
+  padding: 8px 14px;
+  font-family: var(--u-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--u-ink);
+  text-decoration: none;
+  background: none;
+  cursor: pointer;
+  border: var(--u-rule) solid var(--u-baseline);
+  border-radius: var(--u-radius-max);
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+a[href].u-btn:hover,
+button.u-btn:hover,
+.u-btn:hover { border-color: var(--u-signal); color: var(--u-signal-text); }
+
+/* ── Cifras ─────────────────────────────────────────────────────────
+   Una fila de cifras se compara dígito a dígito, así que va en mono con
+   numerales tabulares (UMB-TYP-004). Son filas separadas por reglas de
+   1px, no tarjetas (UMB-LAY-007). */
+
+.u-figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0;
+  margin: 0 0 20px;
+  border-top: var(--u-rule) solid var(--u-border);
+}
+.u-figure-cell {
+  padding: 20px 24px 20px 0;
+  border-bottom: var(--u-rule) solid var(--u-border);
+}
+.u-figure-label {
+  display: block;
+  font-family: var(--u-font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--u-caption);
+  margin-bottom: 8px;
+}
+.u-figure-value {
+  display: block;
+  font-family: var(--u-font-mono);
+  font-weight: var(--u-weight-mono-medium);
+  font-variant-numeric: tabular-nums;
+  font-size: 30px;
+  line-height: 1.1;
+  color: var(--u-ink);
+}
+.u-figure-note {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--u-muted);
+  max-width: 34ch;
+}
+
+/* ── Encuadre de gráfica ────────────────────────────────────────────
+   Ninguna gráfica se publica sin título-hallazgo, subtítulo, fuente y
+   CSV (UMB-CHT-001/002/003, UMB-A11Y-004). Lo dibuja components/frame.js;
+   estas reglas son su hoja. */
+
+.u-chart { margin: 0 0 8px; }
+
+.u-chart-title {
+  font-family: var(--u-font-display);
+  font-weight: var(--u-weight-display);
+  letter-spacing: var(--u-tracking-display);
+  font-size: 23px;
+  line-height: 1.25;
+  color: var(--u-ink);
+  margin: 0 0 6px;
+  max-width: 46ch;
+}
+
+.u-chart-subtitle {
+  font-size: 15px;
+  color: var(--u-muted);
+  margin: 0 0 20px;
+  max-width: var(--u-measure);
+}
+
+.u-chart-plot { overflow-x: auto; }
+
+.u-chart-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: var(--u-rule) solid var(--u-border);
+}
+
+.u-source {
+  font-family: var(--u-font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--u-caption);
+  margin: 0;
+  max-width: none;
+}
+
+.u-note {
+  font-size: 14px;
+  color: var(--u-muted);
+  max-width: var(--u-measure);
+  margin: 12px 0 0;
+}
+
+/* ── Tabla de datos ─────────────────────────────────────────────────
+   guide/04-layout.md § Tablas de datos. Regla superior de 2px en ink,
+   reglas de fila de 1px, cifras en mono tabular a la derecha. */
+
+.u-table-wrap { overflow-x: auto; margin-top: 16px; }
+
+table.u-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+table.u-table thead th {
+  border-top: var(--u-rule-strong) solid var(--u-ink);
+  border-bottom: var(--u-rule) solid var(--u-border);
+  padding: 10px 12px 10px 0;
+  text-align: left;
+  font-family: var(--u-font-body);
+  font-weight: var(--u-weight-body-strong);
+  color: var(--u-ink);
+  white-space: nowrap;
+}
+table.u-table td {
+  border-bottom: var(--u-rule) solid var(--u-border);
+  padding: 8px 12px 8px 0;
+  color: var(--u-ink);
+}
+table.u-table th.u-num,
+table.u-table td.u-num {
+  text-align: right;
+  font-family: var(--u-font-mono);
+  font-variant-numeric: tabular-nums;
+  padding-right: 0;
+}
+table.u-table td.u-nodata { color: var(--u-caption); }
+
+details.u-details { margin-top: 16px; }
+details.u-details > summary {
+  font-family: var(--u-font-mono);
+  font-size: 12px;
+  color: var(--u-caption);
+  cursor: pointer;
+  padding: 6px 0;
+  list-style: none;
+}
+details.u-details > summary::-webkit-details-marker { display: none; }
+details.u-details > summary::before { content: "+ "; }
+details.u-details[open] > summary::before { content: "− "; }
+details.u-details > summary:hover { color: var(--u-signal-text); }
+
+/* ── Listas de elementos ────────────────────────────────────────────
+   UMB-LAY-007: filas con regla de 1px, nunca tarjetas. */
+
+ul.u-rows { list-style: none; margin: 0; padding: 0; }
+ul.u-rows > li {
+  padding: 20px 0;
+  border-top: var(--u-rule) solid var(--u-border);
+}
+ul.u-rows > li:first-child { border-top: 0; }
+.u-row-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+}
+.u-row-name {
+  font-family: var(--u-font-mono);
+  font-weight: var(--u-weight-mono-medium);
+  font-size: 16px;
+  color: var(--u-ink);
+  margin: 0;
+}
+.u-row-meta {
+  font-family: var(--u-font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--u-caption);
+}
+.u-row-desc {
+  margin: 8px 0 0;
+  max-width: 64ch;
+  font-size: 16px;
+  color: var(--u-muted);
+}
+
+/* Prosa numerada de la página de método. */
+ol.u-caveats { padding-left: 1.2em; max-width: var(--u-measure); }
+ol.u-caveats > li { margin-bottom: 14px; }
+ol.u-caveats > li::marker {
+  font-family: var(--u-font-mono);
+  color: var(--u-caption);
+}
+
+pre.u-cite {
+  font-family: var(--u-font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  color: var(--u-ink);
+  background: var(--u-panel);
+  border: var(--u-rule) solid var(--u-border);
+  border-radius: var(--u-radius-max);
+  padding: 16px;
+  max-width: var(--u-measure);
+}
+
+/* ── Pie ────────────────────────────────────────────────────────────
+   Licencia del código, licencia de los datos, enlace al repositorio. */
+
+#observablehq-footer {
+  position: relative;
+  z-index: 1;
+  max-width: var(--u-sheet);
+  margin: clamp(80px, 14vh, 140px) auto 0;
+  padding: 0 var(--u-edge);
+  background: var(--u-base);
+  font: 13px var(--u-font-mono);
+  color: var(--u-muted);
+}
+.u-footer-inner {
+  max-width: var(--u-column);
+  margin: 0 auto;
+  padding: 24px 0 40px;
+  border-top: var(--u-rule) solid var(--u-border);
+}
+.u-footer-line { margin: 0 0 6px; max-width: none; }
+#observablehq-footer a[href] { color: var(--u-muted); }
+#observablehq-footer a[href]:hover { color: var(--u-signal-text); }
+
+/* ── Gráficas de Plot ───────────────────────────────────────────────
+   Rejilla horizontal, línea base más oscura, sin recuadro. */
+
+.u-chart figure,
+.u-chart svg { background: transparent; }
+.u-chart-plot svg { max-width: 100%; height: auto; }
+
+/* ── Movimiento ─────────────────────────────────────────────────────
+   UMB-A11Y-007. Nada del sistema depende de la animación para
+   comunicar. */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  body::before { display: none; }
+  .u-nav, .u-controls, .u-btn { display: none; }
+}

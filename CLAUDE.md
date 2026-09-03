@@ -18,10 +18,12 @@ other variables. Output goes to data/processed/.
 - Be gentle: respect REQUEST_DELAY_SECONDS, use tenacity for retries.
 - Never commit data/raw/ (may contain sensitive detail).
 - CSV schema is defined in docs/data_dictionary.md — keep it in sync.
-- The dashboard (dashboard/, run `streamlit run dashboard/app.py` from
-  the repo root) reads only data/processed/ and data/reference/ —
-  never the network. When concatenating yearly all-states files,
-  dedupe SIN_FECHA rows (see data.py / data_dictionary.md).
+- The dashboard is an Observable Framework site rooted at dashboard/.
+  Run `npm run dev` from the repo root; `npm run build` writes dist/.
+  Its data loaders (dashboard/data/*.csv.py) read only data/processed/
+  and data/reference/ — never the network. When concatenating yearly
+  all-states files, dedupe SIN_FECHA rows (see dashboard/data/_common.py
+  and data_dictionary.md).
 
 ## Brand — binding for all UI, charts, and published artifacts
 Anything user-facing (dashboard, figures, social, docs) follows the
@@ -37,13 +39,26 @@ matching the schema, with totals that match the dashboard's displayed count.
 
 ---
 
-<!-- Umbral design system v1.1.0 — paste into a downstream repo's CLAUDE.md.
+<!-- Umbral design system v1.3.0 — paste into a downstream repo's CLAUDE.md.
      GENERATED; regenerate from umbralmx/umbral-style-guide rather than editing. -->
 
 ## Umbral brand — the minimum
 
-This repo follows the Umbral design system, pinned at **v1.1.0**.
-Full guide: https://github.com/umbralmx/umbral-style-guide/tree/v1.1.0/guide
+This repo follows the Umbral design system at **v1.3.0**.
+
+v1.3.0 ships in `package.json` on the upstream `main` but carries no git
+tag yet — the newest tag is v1.1.0. So every URL below pins the merge
+commit `ef694c5e`, which is immutable in the same way a tag is. Move
+them to `v1.3.0` once that tag exists.
+
+Full guide: https://github.com/umbralmx/umbral-style-guide/tree/ef694c5e9e98658049ff57390856770208908f9c/guide
+
+The dashboard is **modo laboratorio** (light), in the minimal idiom of
+umbral.org.mx: dot field in the outer margin only (UMB-LAY-009), a
+content sheet over it, mono lowercase section labels (UMB-LAY-006),
+rows separated by 1px rules instead of cards (UMB-LAY-007), and
+secondary controls as 1px mono rectangles that move to signal on
+hover and focus (UMB-LAY-008). See DECISIONS.md #16.
 
 **Load the skill** before producing anything visual: copy
 `umbral-style-guide/skills/umbral-brand/` into `.claude/skills/`, or install the packaged
@@ -52,15 +67,15 @@ Full guide: https://github.com/umbralmx/umbral-style-guide/tree/v1.1.0/guide
 **Never hand-type a colour, font or spacing value.** Import them:
 
 ```
-https://raw.githubusercontent.com/umbralmx/umbral-style-guide/v1.1.0/tokens/build/tokens.css     # web
-https://raw.githubusercontent.com/umbralmx/umbral-style-guide/v1.1.0/tokens/build/tokens.json    # anything
-https://raw.githubusercontent.com/umbralmx/umbral-style-guide/v1.1.0/tokens/build/tokens.py      # Python / Streamlit / notebooks
-https://raw.githubusercontent.com/umbralmx/umbral-style-guide/v1.1.0/tokens/build/tokens.R       # R / Quarto
-https://raw.githubusercontent.com/umbralmx/umbral-style-guide/v1.1.0/tokens/build/streamlit-config.toml
-https://raw.githubusercontent.com/umbralmx/umbral-style-guide/v1.1.0/rules/rules.json            # the 69 rules, machine-readable
+https://raw.githubusercontent.com/umbralmx/umbral-style-guide/ef694c5e9e98658049ff57390856770208908f9c/tokens/build/tokens.css     # web
+https://raw.githubusercontent.com/umbralmx/umbral-style-guide/ef694c5e9e98658049ff57390856770208908f9c/tokens/build/tokens.json    # anything
+https://raw.githubusercontent.com/umbralmx/umbral-style-guide/ef694c5e9e98658049ff57390856770208908f9c/tokens/build/tokens.py      # Python / Streamlit / notebooks
+https://raw.githubusercontent.com/umbralmx/umbral-style-guide/ef694c5e9e98658049ff57390856770208908f9c/tokens/build/tokens.R       # R / Quarto
+https://raw.githubusercontent.com/umbralmx/umbral-style-guide/ef694c5e9e98658049ff57390856770208908f9c/tokens/build/streamlit-config.toml
+https://raw.githubusercontent.com/umbralmx/umbral-style-guide/ef694c5e9e98658049ff57390856770208908f9c/rules/rules.json            # the 75 rules, machine-readable
 ```
 
-Pin the tag. Never point at `main` — a token change would land without warning.
+Pin a tag or a commit. Never point at `main` — a token change would land without warning.
 
 **Two modes.** `laboratorio` (light) is the default: site, reports, documents, decks.
 `instrumento` (dark) for dashboards, social cards and big-stat slides. Switch with

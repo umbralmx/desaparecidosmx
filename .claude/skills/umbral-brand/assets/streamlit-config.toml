@@ -1,0 +1,23 @@
+# streamlit-config.toml — GENERATED from tokens/src/. Do not edit.
+# Umbral design system · https://github.com/umbralmx/umbral-style-guide
+# Code MIT · content CC BY 4.0
+#
+# Copy to .streamlit/config.toml.
+#
+# Two corrections to the v1.0 brand book (p.10):
+#   1. Its keys were rendered "sc-camel-primary-color" etc. — a camelCase artifact
+#      of the PDF export. The real Streamlit keys are below.
+#   2. It set font = "sans serif", which is a VALID Streamlit value meaning
+#      Streamlit's own Source Sans — not a mangling, just wrong. That is why
+#      pautamx renders Source Sans today. Fixed here.
+#
+# Note: Streamlit maps primaryColor onto every widget accent simultaneously, so
+# the one-signal-per-view rule is scoped to the data layer — see OQ-002.
+
+[theme]
+base                     = "dark"
+primaryColor             = "#5fd4c4"
+backgroundColor          = "#101418"
+secondaryBackgroundColor = "#171c22"
+textColor                = "#edf1f4"
+font                     = "IBM Plex Sans, sans-serif"

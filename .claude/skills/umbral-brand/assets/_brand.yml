@@ -1,0 +1,71 @@
+# _brand.yml — GENERATED from tokens/src/. Do not edit.
+# Umbral design system · https://github.com/umbralmx/umbral-style-guide
+# Code MIT · content CC BY 4.0
+#
+# Quarto brand file. Include with "brand: _brand.yml" in _quarto.yml.
+# Documents are modo laboratorio (light) by default — see guide/14-superficies/quarto.md.
+
+meta:
+  name: umbral_
+  link: https://umbral.mx
+
+logo:
+  images:
+    isotype: assets/logo/umbral-isotype-light.svg
+    lockup: assets/logo/umbral-lockup-light.svg
+  small: isotype
+  medium: lockup
+  large: lockup
+
+color:
+  palette:
+    ink: "#16191c"
+    base: "#f2f3f1"
+    panel: "#fafaf8"
+    border: "#dde0dc"
+    muted: "#565d57"
+    caption: "#6c706d"
+    signal: "#128273"
+    signal-text: "#227c6f"
+    model: "#5a63d8"
+    alert: "#c8503f"
+    ink-dark: "#edf1f4"
+    base-dark: "#101418"
+  foreground: ink
+  background: base
+  primary: signal-text
+  secondary: muted
+  danger: "#be4737"
+
+typography:
+  fonts:
+    - family: Space Grotesk
+      source: file
+      files:
+        - path: assets/fonts/space-grotesk-500-latin.woff2
+          weight: 500
+    - family: IBM Plex Sans
+      source: file
+      files:
+        - path: assets/fonts/ibm-plex-sans-400-latin.woff2
+          weight: 400
+        - path: assets/fonts/ibm-plex-sans-600-latin.woff2
+          weight: 600
+    - family: IBM Plex Mono
+      source: file
+      files:
+        - path: assets/fonts/ibm-plex-mono-400-latin.woff2
+          weight: 400
+  base:
+    family: IBM Plex Sans
+    size: 11pt
+    line-height: 1.58
+  headings:
+    family: Space Grotesk
+    weight: 500
+    color: ink
+  monospace:
+    family: IBM Plex Mono
+    size: 0.9em
+  link:
+    color: signal-text

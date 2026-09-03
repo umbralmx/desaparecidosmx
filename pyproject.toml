@@ -1,0 +1,7 @@
+# Configuración mínima de pytest.
+#
+# Los tests importan `rnpdno`, que vive en src/. Sin esta línea hay que
+# exportar PYTHONPATH=src a mano antes de cada corrida.
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

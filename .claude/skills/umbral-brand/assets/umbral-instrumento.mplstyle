@@ -1,0 +1,30 @@
+# umbral-instrumento.mplstyle — GENERATED from tokens/src/. Do not edit.
+# Umbral design system · https://github.com/umbralmx/umbral-style-guide
+# Code MIT · content CC BY 4.0
+#
+# v1.0's umbral.mplstyle set xtick/ytick colour to the caption token at 2.37:1
+# and used it as the third series. Both are corrected here — see
+# audit/2026-07-conformance.md §3.5 and open-questions.md OQ-008.
+
+figure.facecolor: none
+axes.facecolor: none
+axes.edgecolor: 3a434c
+axes.linewidth: 1
+axes.grid: True
+axes.grid.axis: y
+grid.color: 232a31
+grid.linewidth: 1
+axes.spines.top: False
+axes.spines.right: False
+axes.spines.left: False
+font.family: IBM Plex Sans
+font.size: 12
+axes.titlesize: 16
+axes.titleweight: medium
+axes.titlelocation: left
+xtick.color: 7a848f
+ytick.color: 7a848f
+xtick.labelsize: 12
+ytick.labelsize: 12
+text.color: edf1f4
+axes.prop_cycle: cycler('color', ['5fd4c4', '8b93f8', '8b95a0', 'e26a5a', 'ffce2c', 'b454b3'])

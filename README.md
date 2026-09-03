@@ -9,8 +9,8 @@ The public dashboard only shows aggregate counts per filter combination
 and has no bulk export. This pipeline reproduces the dashboard's
 internal JSON API calls, iterates over filter permutations, caches every
 raw response, and reconciles the normalized output against the
-dashboard's own totals. A [Streamlit dashboard](#dashboard) sits on top
-of the processed CSVs.
+dashboard's own totals. An [Observable Framework dashboard](#dashboard)
+sits on top of the processed CSVs.
 
 ## Output
 
@@ -90,19 +90,38 @@ source and output disagree.
 
 ## Dashboard
 
-A Streamlit monitor over the processed CSVs — three pages (Panorama
-nacional / Detalle por estado / Datos y método) under the Umbral design
-system (`docs/umbral-brand.md`, binding). Run it from the repo root so
-`.streamlit/config.toml` applies:
+An [Observable Framework](https://observablehq.com/framework/) site over
+the processed CSVs — three pages (Panorama nacional / Detalle por estado
+/ Datos y método) under the Umbral design system (`docs/umbral-brand.md`,
+binding). It is a static site: every filter runs in the browser, and the
+built pages never call a server.
 
 ```sh
-streamlit run dashboard/app.py
+npm install          # once
+npm run dev          # preview on http://127.0.0.1:3000
+npm run build        # static site into dist/
 ```
 
-Design decisions (descriptive monitor, SIN_FECHA always visible,
-neutral KPIs, per-100k with stated CONAPO vintage) are logged in
-`docs/DECISIONS.md` entry 12. State population reference data is built
-by `scripts/build_population_reference.py`.
+The build needs Python with pandas on PATH: the data loaders in
+`dashboard/data/*.csv.py` read `data/processed/` and emit the CSVs the
+pages fetch. `observablehq.config.js` picks up `.venv/bin/python3` when
+it exists and falls back to `python3`.
+
+Pushing to `main` builds and publishes to GitHub Pages at
+**https://umbral.org.mx/desaparecidosmx/** (`.github/workflows/deploy.yml`).
+
+The site is a *project page* of the `umbralmx` org, so it inherits the
+custom domain from `umbralmx/umbralmx.github.io`, which holds the CNAME
+for `umbral.org.mx`. This repo must **not** carry a CNAME of its own:
+that would claim the whole domain for this project and take the root
+site down. Every link in the pages is relative, so the site also works
+served from a domain root or any other subpath.
+
+Design decisions (descriptive monitor, SIN_FECHA always visible, neutral
+figures, per-100k with stated CONAPO vintage) are logged in
+`docs/DECISIONS.md` entry 12; the move off Streamlit is entry 16. State
+population reference data is built by
+`scripts/build_population_reference.py`.
 
 ## Repository layout
 
@@ -115,15 +134,24 @@ src/rnpdno/
 ├── export.py      # write per-state monthly CSVs (data/processed/)
 ├── combine.py     # concatenate per-state CSVs into all-states files
 └── run.py         # orchestrator: ingest → export → combine, log-and-continue
-dashboard/
-├── app.py         # Streamlit entry point (three pages via st.navigation)
-├── theme.py       # Umbral tokens, CSS, plotly layout, chart_frame
-├── data.py        # cached loaders (incl. SIN_FECHA dedupe across years)
-├── filters.py     # sidebar rail + full-grain slice download
-├── charts.py      # trend / ranking / categoría×sexo figure builders
-└── views/         # panorama.py, estado.py, datos.py
+dashboard/                 # Observable Framework source root
+├── index.md       # Panorama nacional
+├── estado.md      # Detalle por estado
+├── datos.md       # Datos y método
+├── umbral.css     # the Umbral stylesheet (modo laboratorio)
+├── components/
+│   ├── registro.js  # loads the CSVs, applies filters, builds series
+│   ├── charts.js    # trend / ranking / categoría×sexo Plot builders
+│   ├── frame.js     # the mandatory chart frame + data table
+│   ├── chrome.js    # brand, three-page nav, section labels
+│   ├── format.js    # labels, number format, time helpers, CSV
+│   └── fonts.js     # self-hosted @font-face injection
+├── data/          # data loaders: *.csv.py → CSV served to the browser
+└── assets/        # tokens.css, logo SVGs, woff2 fonts
+vendor/umbral-plot/        # @umbralmx/umbral-plot v1.3.0, vendored
 scripts/
-└── build_population_reference.py  # CONAPO population → data/reference/
+├── build_population_reference.py  # CONAPO population → data/reference/
+└── copy-static.mjs                # CNAME + .nojekyll into dist/
 assets/            # Umbral tokens (tokens.json/.css) + logo SVGs
 docs/
 ├── data_dictionary.md    # CSV schema — the contract for consumers
