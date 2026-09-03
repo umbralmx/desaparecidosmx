@@ -19,9 +19,17 @@
 /* ── Framework → tokens ─────────────────────────────────────────────
    Framework dibuja su armazón con --theme-*. Se reasignan a los tokens
    para que sus propias piezas (Inputs, tablas, código) hereden la marca
-   en vez de competir con ella. */
+   en vez de competir con ella.
+
+   El documento lleva data-mode="instrumento", así que los --u-* que se
+   leen aquí ya son los del modo oscuro: este bloque no cambia entre
+   modos, solo reenvía. */
 
 :root {
+  /* Sin esto, el navegador dibuja los <select> y las casillas con su
+     chrome claro sobre un fondo oscuro. */
+  color-scheme: dark;
+
   --theme-background: var(--u-base);
   --theme-background-a: var(--u-base);
   --theme-background-b: var(--u-panel);
@@ -312,13 +320,37 @@ code, pre, kbd, samp { font-family: var(--u-font-mono); }
   letter-spacing: 0;
 }
 
-.u-controls input[type="checkbox"],
-.u-controls input[type="radio"] {
-  accent-color: var(--u-signal);
+/* La casilla se dibuja a mano.
+   La nativa llega con relleno gris y un radio de ~4px, que rompe
+   UMB-LAY-001 (el radio nunca pasa de 2px). Ésta es un cuadrado de 1px
+   sin relleno, como cualquier otro control secundario (UMB-LAY-008): el
+   borde y la marca pasan a signal al activarse. */
+.u-controls input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-grid;
+  place-content: center;
+  flex: none;
   width: 16px;
   height: 16px;
   margin: 0;
+  background: transparent;
+  border: var(--u-rule) solid var(--u-baseline);
+  border-radius: var(--u-radius);
+  cursor: pointer;
+  transition: border-color 0.18s ease;
 }
+.u-controls input[type="checkbox"]::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  background: var(--u-signal);
+  transform: scale(0);
+  transition: transform 0.12s ease;
+}
+.u-controls input[type="checkbox"]:checked { border-color: var(--u-signal); }
+.u-controls input[type="checkbox"]:checked::before { transform: scale(1); }
+.u-controls input[type="checkbox"]:hover { border-color: var(--u-signal); }
 
 /* El interruptor suelto (una sola casilla, sin grupo) va en línea. */
 .u-controls form:has(> label + input[type="checkbox"]) {
