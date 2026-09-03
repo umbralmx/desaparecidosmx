@@ -7,7 +7,15 @@
  */
 import {tokensFor} from "@umbralmx/umbral-plot/tokens";
 
-export const MODE = "laboratorio";
+/*
+ * Modo instrumento (oscuro).
+ *
+ * Es lo que la tabla de superficies de la guía asigna a un tablero en
+ * vivo. Cambiar esta constante y el atributo data-mode del documento
+ * mueve todo el sistema de color: los tokens, el tema de Plot y los
+ * colores de categoría salen de aquí.
+ */
+export const MODE = "instrumento";
 export const T = tokensFor(MODE);
 
 // umbral-lint: ignore[terminology] — etiquetas oficiales del RNPDNO.

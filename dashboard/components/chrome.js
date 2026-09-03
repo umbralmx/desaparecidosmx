@@ -10,12 +10,14 @@ import {FileAttachment} from "observablehq:stdlib";
 import {html} from "npm:htl";
 
 // Resuelve a la misma URL con hash en preview y en build.
-const isotipo = await FileAttachment("../assets/umbral-isotype-light.svg").url();
+const isotipo = await FileAttachment("../assets/umbral-isotype-dark.svg").url();
 
-// En el build, scripts/copy-static.mjs escribe lang="es" en el HTML, que
-// es lo que importa (UMB-A11Y-001). Esta línea da la misma corrección en
-// `preview`, donde ese paso no corre.
+// En el build, scripts/copy-static.mjs escribe lang="es" y
+// data-mode="instrumento" en el HTML, que es lo que importa
+// (UMB-A11Y-001). Estas líneas dan la misma corrección en `preview`,
+// donde ese paso no corre.
 document.documentElement.lang = "es";
+document.documentElement.dataset.mode = "instrumento";
 
 /*
  * Los enlaces son relativos, nunca absolutos.

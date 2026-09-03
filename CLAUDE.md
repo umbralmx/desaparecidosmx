@@ -53,12 +53,18 @@ them to `v1.3.0` once that tag exists.
 
 Full guide: https://github.com/umbralmx/umbral-style-guide/tree/ef694c5e9e98658049ff57390856770208908f9c/guide
 
-The dashboard is **modo laboratorio** (light), in the minimal idiom of
-umbral.org.mx: dot field in the outer margin only (UMB-LAY-009), a
-content sheet over it, mono lowercase section labels (UMB-LAY-006),
-rows separated by 1px rules instead of cards (UMB-LAY-007), and
-secondary controls as 1px mono rectangles that move to signal on
-hover and focus (UMB-LAY-008). See DECISIONS.md #16.
+The dashboard is **modo instrumento** (dark), which is what the guide's
+surface table assigns to a live dashboard. It uses the minimal layout
+idiom, which is mode-independent: dot field in the outer margin only
+(UMB-LAY-009), a content sheet over it, mono lowercase section labels
+(UMB-LAY-006), rows separated by 1px rules instead of cards
+(UMB-LAY-007), and secondary controls as 1px mono rectangles that move
+to signal on hover and focus (UMB-LAY-008).
+
+Changing mode means changing three things together: `MODE` in
+`dashboard/components/format.js`, the `data-mode` attribute written by
+`scripts/copy-static.mjs` and `chrome.js`, and the isotype variant.
+See DECISIONS.md #16.
 
 **Load the skill** before producing anything visual: copy
 `umbral-style-guide/skills/umbral-brand/` into `.claude/skills/`, or install the packaged

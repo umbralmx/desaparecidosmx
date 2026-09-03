@@ -370,15 +370,26 @@ whenever a call of this kind is made; keep entries short.
      and the `Frame` class that throws when a chart has no source
      (UMB-CHT-003), no title (UMB-CHT-001) or no subtitle
      (UMB-CHT-002).
-  6. **The site is modo laboratorio (light), not instrumento.** This
-     is a deliberate deviation from the surface table in the style
-     guide, which assigns a live dashboard to instrumento. Two
-     reasons override it. This is a project micrositio on a
-     `umbral.org.mx` subdomain, and
-     `guide/14-superficies/web.md` puts that surface in laboratorio.
-     The visual idiom also has to match `umbral.org.mx` itself, which
-     is light. The mode is one attribute, so a later reversal costs
-     one line.
+  6. **The site is modo instrumento (dark).** This is what the
+     surface table in the style guide assigns to a live dashboard.
+     The first build of this migration shipped in laboratorio,
+     reasoning that a project micrositio is a web surface. That was
+     reversed the same day: the surface table is the more specific
+     rule, and this page is a monitor over a living register, not a
+     page about the project.
+     The mode lives in three places, and they must agree:
+     `MODE` in `dashboard/components/format.js`, which drives the
+     Plot theme and the categoría colours; `data-mode` on `<html>`,
+     written by `scripts/copy-static.mjs` at build time and by
+     `chrome.js` in preview; and the isotype variant, which is
+     `umbral-isotype-dark.svg` on a dark ground.
+     The minimal layout idiom does not change with the mode. The dot
+     field, the content sheet, the mono lowercase labels and the 1px
+     rules are all defined against tokens, so they carry over intact
+     (UMB-LAY-006 through UMB-LAY-009).
+     Checkboxes are drawn by hand rather than left native: the
+     browser's dark-scheme checkbox arrives filled, with roughly a
+     4px radius, which breaks UMB-LAY-001.
 - **Why:** Entry 12's decisions all survive the move. The monitor
   stays descriptive. SIN_FECHA counts stay visible and stay out of
   every dated series. The figures stay neutral, with no valenced
