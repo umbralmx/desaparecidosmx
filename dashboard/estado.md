@@ -11,6 +11,7 @@ import {brand, nav, label} from "./components/chrome.js";
 
 ```js
 import {periodoRange} from "./components/periodo.js";
+import {whenVisible} from "./components/lazy.js";
 import {catSexoChart, rankingChart, trendChart} from "./components/charts.js";
 import {chartFrame, figureRow} from "./components/frame.js";
 import {
@@ -218,17 +219,27 @@ display(bd.length
 
 </section>
 
-<section class="u-section">
+<section class="u-section" id="seccion-municipios">
 
 <div>${label("municipios")}</div>
 
 ```js
+// El archivo municipal solo se pide cuando el lector se acerca a esta
+// sección. Es el tramo caro de la página: 744 KB comprimidos y ~420 ms de
+// conversión a objetos, para una gráfica que está muy por debajo del
+// pliegue. Ver components/lazy.js.
+const munVisible = whenVisible("#seccion-municipios");
+```
+
+```js
 // El grano municipal son 139 mil filas; se filtran por entidad antes de
 // materializar los objetos, así que la página nunca construye el resto.
-const munRaw = await municipiosDe(cve);
-const munFiltered = applyFilters(munRaw, {
+// La entidad 33 no tiene desglose municipal: su único «municipio» en la
+// fuente es «Se desconoce». No hay razón para traerle el archivo.
+const munRaw = munVisible && cve !== "33" ? await municipiosDe(cve) : null;
+const munFiltered = munRaw ? applyFilters(munRaw, {
   periodoIni: ini, periodoFin: fin, categorias: cats, sexos: sex
-}).rows;
+}).rows : [];
 
 const munMap = new Map();
 for (const r of munFiltered) {
@@ -256,6 +267,12 @@ display(cve === "33"
   ? html`<div>
       <h3 class="u-chart-title">Los registros sin entidad conocida no tienen desglose municipal</h3>
       <p class="u-chart-subtitle">Estos registros corresponden a personas cuya entidad se desconoce. Su único «municipio» en la fuente es <strong>Se desconoce</strong>. Ubicación desconocida no es cero: por eso esta entidad se reporta como una más.</p>
+    </div>`
+  : !munVisible
+  // Reserva la altura de la gráfica para que la página no salte al
+  // llegar el dato.
+  ? html`<div style="min-height:420px">
+      <p class="u-note">Los municipios se cargan al llegar a esta sección: son 744 KB que no hacen falta para leer el resto de la página.</p>
     </div>`
   : mun.length === 0
   ? html`<p class="u-note">La selección no deja registros municipales en ${entidadLabel}.</p>`
