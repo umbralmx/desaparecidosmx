@@ -51,6 +51,23 @@ diverging()            // change, surplus/deficit, above/below expectation
 The two sequential ramps are indistinguishable under tritanopia, which is why using both in one
 figure is a rule violation rather than a style preference.
 
+## Components
+
+Ten CSS components, in the minimal idiom. `src/components.css` is **authored**, not generated — it
+is the one stylesheet in the system a human edits.
+
+```js
+import '@umbralmx/umbral-plot/dist/umbral.css';      // the tokens
+import '@umbralmx/umbral-plot/components.css';        // the components
+```
+
+`.u-rule` `.u-label` `.u-rows` `.u-btn` `.u-seg` `.u-input` `.u-table` `.u-cell` `.u-dialog`
+`.u-kpi` — they cover the shadcn/ui forms a data surface actually needs. The full catalogue and the
+verdict on each of its 66 components is `guide/16-componentes.md`.
+
+It writes no value: every colour, size and space is a `var(--u-*)`, so load the tokens first.
+`tools/verify_packages.py` fails on a hex or a shadow appearing here.
+
 ## Where the values come from
 
 `src/tokens.js` and `dist/umbral.css` are generated from `tokens/build/` and verified against it in

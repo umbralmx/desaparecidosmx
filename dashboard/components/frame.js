@@ -11,6 +11,9 @@
  * `Frame.render`: ese método trae los estilos en línea y esta hoja ya
  * define el mobiliario.
  */
+// umbral-lint: ignore-file[chart-source-present] — este archivo ES el que
+// dibuja la línea de fuente. El literal «Fuente:» vive en Frame.sourceLine()
+// del paquete de marca, así que la heurística de un archivo a la vez no lo ve.
 import {Frame} from "@umbralmx/umbral-plot";
 import {csvHref, fmt} from "./format.js";
 
@@ -141,7 +144,8 @@ export function dataTable(data, {columns, numericColumns = [], open = false} = {
     const th = document.createElement("th");
     th.scope = "col";
     th.textContent = c;
-    if (numeric.has(c)) th.className = "u-num";
+    // components.css alinea y pone en mono por atributo, no por clase.
+    if (numeric.has(c)) th.setAttribute("data-numeric", "");
     htr.append(th);
   }
   thead.append(htr);
@@ -154,13 +158,15 @@ export function dataTable(data, {columns, numericColumns = [], open = false} = {
       const td = document.createElement("td");
       const v = row[c];
       if (v === null || v === undefined || v === "") {
-        // Una celda sin dato dice «sin dato», nunca 0 ni vacía.
+        // «Sin registro» no es cero ni vacío: lleva su propio relleno y su
+        // propia palabra (UMB-COL-010).
         td.textContent = "sin dato";
-        td.className = numeric.has(c) ? "u-num u-nodata" : "u-nodata";
+        td.className = "u-cell";
+        td.setAttribute("data-estado", "sin-registro");
       } else {
         td.textContent = typeof v === "number" ? fmt(v) : String(v);
-        if (numeric.has(c)) td.className = "u-num";
       }
+      if (numeric.has(c)) td.setAttribute("data-numeric", "");
       tr.append(td);
     }
     tbody.append(tr);
@@ -171,23 +177,30 @@ export function dataTable(data, {columns, numericColumns = [], open = false} = {
   return details;
 }
 
-/** Una fila de cifras. Mono, numerales tabulares, separadas por reglas. */
+/**
+ * Una fila de cifras.
+ *
+ * Cada celda es el componente `.u-kpi` de components.css: mono, numerales
+ * tabulares, etiqueta en caption. La retícula que las separa con reglas de
+ * 1px —y no con tarjetas— la pone `.u-kpis` en umbral.css (UMB-LAY-007).
+ */
 export function figureRow(items) {
   const div = document.createElement("div");
-  div.className = "u-figures";
+  div.className = "u-kpis";
   for (const it of items) {
     const cell = document.createElement("div");
-    cell.className = "u-figure-cell";
+    cell.className = "u-kpi";
     const label = document.createElement("span");
-    label.className = "u-figure-label";
+    label.className = "u-kpi__label";
     label.textContent = it.label;
     const value = document.createElement("span");
-    value.className = "u-figure-value";
+    value.className = "u-kpi__value";
     value.textContent = typeof it.value === "number" ? fmt(it.value) : it.value;
+    // La etiqueta va antes que la cifra en el orden de lectura.
     cell.append(label, value);
     if (it.note) {
       const note = document.createElement("span");
-      note.className = "u-figure-note";
+      note.className = "u-kpi__note";
       note.textContent = it.note;
       cell.append(note);
     }

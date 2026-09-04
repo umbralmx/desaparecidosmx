@@ -7,11 +7,21 @@
  * columnas, el tramo entero se ve de una vez y el rango se lee como una
  * banda continua.
  *
- * La forma viene del calendario de shadcn/ui, en modo rango y con grano
- * de mes. El acabado no: ese componente usa esquinas redondeadas,
- * sombras y extremos de rango en forma de píldora, y las tres cosas
- * están prohibidas (UMB-LAY-001, UMB-LAY-002). Aquí las celdas son
- * cuadradas, la selección se marca con relleno y el borde es de 1px.
+ * `calendar` y `date-picker` son «adopta» en guide/16-componentes.md.
+ * `date-picker` es la composición de `calendar` con `popover`, y `popover`
+ * es una de las seis capas superpuestas que gobierna UMB-A11Y-008: el foco
+ * entra al abrir, queda atrapado mientras la capa está abierta, Escape
+ * cierra y el foco vuelve al control de origen.
+ *
+ * Ese contrato no se escribe a mano aquí. Un <dialog> nativo abierto con
+ * showModal() lo da entero, que es la razón por la que components.css
+ * colapsa las cinco formas de capa en `.u-dialog`.
+ *
+ * Del componente de shadcn se copia la forma, no el acabado: trae esquinas
+ * redondeadas, sombra y extremos de rango en píldora, y las tres están
+ * prohibidas (UMB-LAY-001, UMB-LAY-002). Aquí las celdas son cuadradas, la
+ * selección se marca con relleno y el borde es de 1px. Las fechas viajan en
+ * ISO dentro del dato (UMB-NUM-003).
  *
  * El nodo se comporta como un Input de Observable: expone `value` y
  * emite «input» al cambiar, así que `Generators.input` lo lee igual que
@@ -71,12 +81,20 @@ export function periodoRange(periodos, {value, label = "Periodo"} = {}) {
   valorTexto.className = "u-periodo-valor";
   trigger.append(valorTexto);
 
-  const panel = document.createElement("div");
-  panel.className = "u-periodo-panel";
-  panel.hidden = true;
+  const panel = document.createElement("dialog");
+  panel.className = "u-dialog u-periodo-dialog";
   const panelId = `periodo-${Math.random().toString(36).slice(2, 8)}`;
   panel.id = panelId;
   trigger.setAttribute("aria-controls", panelId);
+
+  // El diálogo necesita un nombre accesible propio; el disparador no se lo
+  // presta una vez que el foco entra en la capa.
+  const titulo = document.createElement("h2");
+  titulo.className = "u-dialog__title";
+  titulo.id = `${panelId}-titulo`;
+  titulo.textContent = "Periodo por mes";
+  panel.setAttribute("aria-labelledby", titulo.id);
+  panel.append(titulo);
 
   // ── Cabecera del panel ───────────────────────────────────────────
   const head = document.createElement("div");
@@ -198,6 +216,7 @@ export function periodoRange(periodos, {value, label = "Periodo"} = {}) {
     anclaPendiente = null;
     pintar();
     emitir();
+    cerrar();
   }
 
   // ── Interacción ──────────────────────────────────────────────────
@@ -246,12 +265,12 @@ export function periodoRange(periodos, {value, label = "Periodo"} = {}) {
         elegir(p);
         return;
       case "Escape":
+        // Con un ancla a medias, Escape la cancela y deja la capa abierta.
+        // Sin ancla, se deja pasar y el <dialog> cierra por su cuenta.
         if (anclaPendiente !== null) {
+          e.preventDefault();
           anclaPendiente = null;
           pintar();
-        } else {
-          cerrar();
-          trigger.focus();
         }
         return;
       default: return;
@@ -278,20 +297,32 @@ export function periodoRange(periodos, {value, label = "Periodo"} = {}) {
   });
 
   function abrir() {
-    panel.hidden = false;
+    // showModal() —no show()— es lo que atrapa el foco y habilita Escape.
+    panel.showModal();
     trigger.setAttribute("aria-expanded", "true");
     enfocar(conDatos.has(ini) ? ini : primero);
   }
 
   function cerrar() {
-    panel.hidden = true;
+    if (panel.open) panel.close();
+  }
+
+  // `close` cubre las tres salidas: el botón, Escape y el cierre por
+  // programa. El navegador devuelve el foco al disparador por su cuenta.
+  panel.addEventListener("close", () => {
     trigger.setAttribute("aria-expanded", "false");
     anclaPendiente = null;
     pintar();
-  }
+  });
+
+  // Un clic en el fondo cierra, como cualquier popover. El fondo es el
+  // propio <dialog>: su contenido no recibe estos clics.
+  panel.addEventListener("click", (e) => {
+    if (e.target === panel) cerrar();
+  });
 
   trigger.addEventListener("click", () => {
-    panel.hidden ? abrir() : cerrar();
+    panel.open ? cerrar() : abrir();
   });
 
   Object.defineProperty(root, "value", {

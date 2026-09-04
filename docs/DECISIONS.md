@@ -434,3 +434,46 @@ whenever a call of this kind is made; keep entries short.
   6. **The grid is one tab stop.** A roving `tabindex` moves with the
      focus. Arrows move by month and by year, Enter selects, and Escape
      cancels a half-made range (UMB-A11Y-006).
+
+## 18. Adopt the v1.6.0 component layer instead of hand-rolling it
+
+- **Problem:** Entry 17 built the period picker freehand, taking the form
+  from `shadcn/ui` and re-deriving the finish against the rules by hand.
+  The style guide then shipped that work as a system. v1.4.0 added an
+  Observable Framework surface chapter. v1.5.0 catalogued 66 `shadcn/ui`
+  components against the rules. v1.6.0 built ten of them as
+  `packages/umbral-plot/src/components.css`.
+  Four of this repo's hand-written classes had the same names as four
+  official ones: `.u-btn`, `.u-label`, `.u-table` and `.u-rows`. Keeping
+  both would mean two definitions of one component, which is the defect
+  the token chain exists to prevent.
+- **Decision:** Take the system's version of everything the system now
+  ships, and keep only what is specific to this project.
+- **Sub-decisions:**
+  1. **`dashboard/observable-framework-instrumento.css` is copied, not
+     written.** It is generated from `tokens/build/`. It declares the
+     nine `--theme-*` properties instead of letting Framework derive
+     four of them with `color-mix()`, which UMB-COL-012 forbids because
+     a derived colour never reaches the contrast gate. It also fixes the
+     card radius, the 700-weight big figure, the Menlo mono stack, the
+     measure and the 44px touch target. Do not edit it; replace it with
+     the next version of the system.
+  2. **`components.css` is copied too.** The repo's own stylesheet lost
+     its duplicate definitions of `.u-btn`, `.u-label`, `.u-table` and
+     `.u-rows`, and its figure row moved to the official `.u-kpi`.
+     Numeric table cells now carry `data-numeric`, and a cell with no
+     value carries `data-estado="sin-registro"` (UMB-COL-010).
+  3. **The picker's panel is a native `<dialog>`.** The catalogue calls
+     `date-picker` a composition of `calendar` and `popover`, and
+     `popover` is one of the six overlays bound by UMB-A11Y-008: focus
+     enters, focus is trapped, Escape closes, focus returns to the
+     opener. `showModal()` supplies all four. The previous version was
+     an inline disclosure panel and supplied none of them.
+  4. **The mode stays instrumento**, which the new surface chapter
+     confirms for a live dashboard.
+- **What did not move:** the dot field, the content sheet, the brand,
+  the three-page navigation, the chart frame and the period grid. None
+  of those is in the system, so all six stay here.
+- **Why:** every value the system defines should have one home. After
+  this entry the repo's stylesheet holds no colour, no type stack and no
+  component the guide already ships.

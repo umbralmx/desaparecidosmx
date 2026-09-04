@@ -47,8 +47,8 @@ const sexos = Generators.input(sexosInput);
 ```
 
 <div>${label("filtros · por fecha de hechos")}</div>
-<div class="u-periodo-field">${periodoInput}</div>
 <div class="u-controls">
+  <div class="u-field">${periodoInput}</div>
   <div class="u-field">${categoriasInput}</div>
   <div class="u-field">${sexosInput}</div>
 </div>

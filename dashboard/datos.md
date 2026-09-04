@@ -24,21 +24,21 @@ import {fmt, titleEs} from "./components/format.js";
 <div>${label("el registro, en tres cifras")}</div>
 
 ```js
-display(html`<div class="u-figures">
-  <div class="u-figure-cell">
-    <span class="u-figure-label">Registros con fecha de hechos</span>
-    <span class="u-figure-value">${fmt(meta.total_con_fecha)}</span>
-    <span class="u-figure-note">Repartidos en ${periodos.length} meses, de ${periodos[0]} a ${periodos[periodos.length - 1]}.</span>
+display(html`<div class="u-kpis">
+  <div class="u-kpi">
+    <span class="u-kpi__label">Registros con fecha de hechos</span>
+    <span class="u-kpi__value">${fmt(meta.total_con_fecha)}</span>
+    <span class="u-kpi__note">Repartidos en ${periodos.length} meses, de ${periodos[0]} a ${periodos[periodos.length - 1]}.</span>
   </div>
-  <div class="u-figure-cell">
-    <span class="u-figure-label">Registros sin fecha de hechos</span>
-    <span class="u-figure-value">${fmt(meta.total_sin_fecha)}</span>
-    <span class="u-figure-note">Fuera de toda serie mensual. La fuente solo los expone por categoría.</span>
+  <div class="u-kpi">
+    <span class="u-kpi__label">Registros sin fecha de hechos</span>
+    <span class="u-kpi__value">${fmt(meta.total_sin_fecha)}</span>
+    <span class="u-kpi__note">Fuera de toda serie mensual. La fuente solo los expone por categoría.</span>
   </div>
-  <div class="u-figure-cell">
-    <span class="u-figure-label">Entidades</span>
-    <span class="u-figure-value">${entidades.length}</span>
-    <span class="u-figure-note">Las 32 entidades federativas más «entidad no especificada».</span>
+  <div class="u-kpi">
+    <span class="u-kpi__label">Entidades</span>
+    <span class="u-kpi__value">${entidades.length}</span>
+    <span class="u-kpi__note">Las 32 entidades federativas más «entidad no especificada».</span>
   </div>
 </div>`);
 ```
@@ -107,7 +107,7 @@ display(html`<div class="u-controls">
 <tr><td><code>sexo</code></td><td><code>MUJER</code></td><td>vacío en filas residuales y en <code>SIN_FECHA</code></td></tr>
 <tr><td><code>cve_municipio</code></td><td><code>01005</code></td><td>clave INEGI de 5 dígitos</td></tr>
 <tr><td><code>municipio</code></td><td><code>JESÚS MARÍA</code></td><td>o <code>MUNICIPIO NO DESGLOSADO</code> (residual)</td></tr>
-<tr><td><code>conteo</code></td><td class="u-num">12</td><td>registros en esa combinación</td></tr>
+<tr><td><code>conteo</code></td><td data-numeric>12</td><td>registros en esa combinación</td></tr>
 <tr><td><code>consultado_en</code></td><td><code>2026-08-09</code></td><td>fecha UTC de consulta al API</td></tr>
 </tbody>
 </table>
