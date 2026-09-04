@@ -551,6 +551,26 @@ dialog.u-periodo-dialog {
   .u-periodo-row { grid-template-columns: 2.6rem repeat(12, 1fr); }
 }
 
+/* ── Indicador de carga ─────────────────────────────────────────────
+   Framework dibuja un ↻ girando en cada celda pendiente, desde el primer
+   cuadro. Una celda que resuelve en 80ms alcanzaba a parpadear igual, así
+   que la página arrancaba con una docena de iconos girando.
+
+   El indicador se retrasa 400ms: lo que tarda poco ya no parpadea, y lo
+   que tarda de verdad sigue avisando. No se oculta, solo se retrasa. */
+
+observablehq-loading {
+  opacity: 0;
+  animation-name: observablehq-loading, u-loading-in;
+  animation-duration: 1s, 1ms;
+  animation-delay: 0s, 400ms;
+  animation-iteration-count: infinite, 1;
+  animation-timing-function: linear, linear;
+  animation-fill-mode: none, forwards;
+}
+
+@keyframes u-loading-in { to { opacity: 1; } }
+
 /* ── Pie ────────────────────────────────────────────────────────────
    Licencia del código, licencia de los datos, enlace al repositorio. */
 

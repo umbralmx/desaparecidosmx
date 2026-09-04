@@ -4,19 +4,32 @@ toc: false
 ---
 
 ```js
+// El armazón de la página va en su propio bloque, y por tanto en su propia
+// celda. Framework funde todas las importaciones de UN bloque en UNA celda:
+// juntas, la marca y la navegación esperaban a que llegaran los CSV, y la
+// página arrancaba con doce indicadores girando. Separadas, el armazón se
+// dibuja de inmediato y solo espera lo que de verdad necesita el dato.
 import "./components/fonts.js";
 import {brand, nav, label} from "./components/chrome.js";
+```
+
+```js
+// Sin dato: se resuelven en cuanto bajan los módulos.
 import {periodoRange} from "./components/periodo.js";
-import {
-  CATEGORIA_KEYS, SEXO_KEYS, applyFilters, consultado, entidades, meta,
-  monthlySeries, nacional, periodos, poblacion, sinFecha, sumBy
-} from "./components/registro.js";
 import {catSexoChart, rankingChart, trendChart} from "./components/charts.js";
 import {chartFrame, figureRow} from "./components/frame.js";
 import {
   CATEGORIA_COLORS, CATEGORIA_LABELS, CATEGORIA_TEXT_COLORS, SEXO_LABELS,
   fmt, fmt1, provisionalFrom, titleEs
 } from "./components/format.js";
+```
+
+```js
+// El único bloque que espera a la red.
+import {
+  CATEGORIA_KEYS, SEXO_KEYS, applyFilters, consultado, entidades, meta,
+  monthlySeries, nacional, periodos, poblacion, sinFecha, sumBy
+} from "./components/registro.js";
 ```
 
 <div>${brand()}</div>

@@ -4,11 +4,18 @@ toc: false
 ---
 
 ```js
+// Ver index.md: el armazón va aparte para que no espere al dato.
 import "./components/fonts.js";
 import {brand, nav, label} from "./components/chrome.js";
-import {consultado, entidades, meta, periodos, sinFecha} from "./components/registro.js";
+```
+
+```js
 import {dataTable} from "./components/frame.js";
 import {fmt, titleEs} from "./components/format.js";
+```
+
+```js
+import {consultado, entidades, meta, periodos, sinFecha} from "./components/registro.js";
 ```
 
 <div>${brand()}</div>

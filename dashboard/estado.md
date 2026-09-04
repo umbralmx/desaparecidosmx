@@ -4,19 +4,26 @@ toc: false
 ---
 
 ```js
+// Ver index.md: el armazón va aparte para que no espere al dato.
 import "./components/fonts.js";
 import {brand, nav, label} from "./components/chrome.js";
+```
+
+```js
 import {periodoRange} from "./components/periodo.js";
-import {
-  CATEGORIA_KEYS, SEXO_KEYS, applyFilters, consultado, entidades, meta,
-  monthlySeries, municipiosDe, nacional, periodos, sinFecha, sumBy
-} from "./components/registro.js";
 import {catSexoChart, rankingChart, trendChart} from "./components/charts.js";
 import {chartFrame, figureRow} from "./components/frame.js";
 import {
   CATEGORIA_COLORS, CATEGORIA_LABELS, CATEGORIA_TEXT_COLORS, SEXO_LABELS,
   csvHref, fmt, fmt1, provisionalFrom, titleEs
 } from "./components/format.js";
+```
+
+```js
+import {
+  CATEGORIA_KEYS, SEXO_KEYS, applyFilters, consultado, entidades, meta,
+  monthlySeries, municipiosDe, nacional, periodos, sinFecha, sumBy
+} from "./components/registro.js";
 ```
 
 <div>${brand()}</div>

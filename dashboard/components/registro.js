@@ -26,22 +26,25 @@ function numeric(rows, columns) {
   return rows;
 }
 
-export const meta = await FileAttachment("../data/meta.json").json();
+/*
+ * Los cuatro archivos se piden a la vez.
+ *
+ * Escritos como cuatro `await` seguidos, el navegador hacía cuatro viajes
+ * en serie y la página esperaba la suma de los cuatro. Ninguno depende de
+ * otro, así que van en un solo Promise.all y la espera pasa a ser la del
+ * más lento.
+ */
+const [metaRaw, nacionalRaw, sinFechaRaw, poblacionRaw] = await Promise.all([
+  FileAttachment("../data/meta.json").json(),
+  FileAttachment("../data/nacional.csv").csv(),
+  FileAttachment("../data/sin-fecha.csv").csv(),
+  FileAttachment("../data/poblacion.csv").csv()
+]);
 
-export const nacional = numeric(
-  await FileAttachment("../data/nacional.csv").csv(),
-  ["conteo"]
-);
-
-export const sinFecha = numeric(
-  await FileAttachment("../data/sin-fecha.csv").csv(),
-  ["conteo"]
-);
-
-export const poblacion = numeric(
-  await FileAttachment("../data/poblacion.csv").csv(),
-  ["anio", "poblacion"]
-);
+export const meta = metaRaw;
+export const nacional = numeric(nacionalRaw, ["conteo"]);
+export const sinFecha = numeric(sinFechaRaw, ["conteo"]);
+export const poblacion = numeric(poblacionRaw, ["anio", "poblacion"]);
 
 /**
  * Grano municipal, solo de una entidad.
