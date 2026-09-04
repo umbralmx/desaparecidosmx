@@ -6,7 +6,6 @@ toc: false
 ```js
 import "./components/fonts.js";
 import {brand, nav, label} from "./components/chrome.js";
-import {periodoRange} from "./components/periodo.js";
 import {
   CATEGORIA_KEYS, SEXO_KEYS, applyFilters, consultado, entidades, meta,
   monthlySeries, nacional, periodos, poblacion, sinFecha, sumBy
@@ -33,7 +32,10 @@ import {
 // Los controles se construyen aquí y se colocan más abajo, dentro del
 // riel de filtros. `view()` los dibujaría en el lugar del bloque de
 // código; `Generators.input` da el valor reactivo sin dibujar nada.
-const periodoInput = periodoRange(periodos);
+const periodoIniInput = Inputs.select(periodos, {label: "Desde", value: periodos[0]});
+const periodoFinInput = Inputs.select(periodos, {
+  label: "Hasta", value: periodos[periodos.length - 1]
+});
 const categoriasInput = Inputs.checkbox(CATEGORIA_KEYS, {
   label: "Categoría", value: CATEGORIA_KEYS, format: (d) => CATEGORIA_LABELS[d]
 });
@@ -41,21 +43,25 @@ const sexosInput = Inputs.checkbox(SEXO_KEYS, {
   label: "Sexo", value: SEXO_KEYS, format: (d) => SEXO_LABELS[d]
 });
 
-const periodo = Generators.input(periodoInput);
+const periodoIni = Generators.input(periodoIniInput);
+const periodoFin = Generators.input(periodoFinInput);
 const categorias = Generators.input(categoriasInput);
 const sexos = Generators.input(sexosInput);
 ```
 
 <div>${label("filtros · por fecha de hechos")}</div>
-<div class="u-periodo-field">${periodoInput}</div>
 <div class="u-controls">
+  <div class="u-field">${periodoIniInput}</div>
+  <div class="u-field">${periodoFinInput}</div>
   <div class="u-field">${categoriasInput}</div>
   <div class="u-field">${sexosInput}</div>
 </div>
 
 ```js
-// El control entrega el par ya ordenado.
-const [ini, fin] = periodo;
+// El rango se normaliza: elegir «hasta» antes que «desde» no debe vaciar
+// la página, solo invertir los extremos.
+const ini = periodoIni <= periodoFin ? periodoIni : periodoFin;
+const fin = periodoIni <= periodoFin ? periodoFin : periodoIni;
 const cats = categorias.length ? categorias : CATEGORIA_KEYS;
 const sex = sexos.length ? sexos : SEXO_KEYS;
 
