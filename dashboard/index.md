@@ -36,7 +36,9 @@ import {
 
 # El RNPDNO registra a las personas desaparecidas, no localizadas y localizadas en México
 
-<p class="u-standfirst">Registros por <strong>fecha de hechos</strong>, 2010–2026, las 32 entidades más «entidad no especificada». El registro es vivo: los conteos del mismo periodo cambian entre consultas.</p>
+<p class="u-standfirst">Sin embargo, su acceso es restrictivo y opaco debido a las características de su diseño, la tecnología usada para su operación y los propios retos que enfrentan las autoridades para la recolección y sistematización de dichos datos. Con el objetivo de facilitar su acceso a investigadores, periodistas y de la sociedad civil, Umbral libera esta herramienta. Aquí, podrán acceder a una versión más amplia de la estadística descriptiva y descargar los datos agregados para su consulta. Los datos disponibles en esta herramienta constan de los registros por <strong>fecha de hechos</strong>, 2010–2026, para las 32 entidades más «entidad no especificada».</p>
+
+<p class="u-standfirst">Una nota metodológica importante, es que los datos extraidos del RNPDNO tienden a contar con discrepancias que dificultan la comparación de periodios y a menudo están condicionados a cuándo se hizo la consulta y bajo que filtros, por lo que se actualiza constantemente de manera retroactiva. Para más información, consulta la sección de <strong>datos y método</strong></p>
 
 <div>${nav("index")}</div>
 
@@ -59,7 +61,7 @@ const categorias = Generators.input(categoriasInput);
 const sexos = Generators.input(sexosInput);
 ```
 
-<div>${label("filtros · por fecha de hechos")}</div>
+<div>${label("Filtros por fecha de hechos")}</div>
 <div class="u-controls">
   <div class="u-field">${periodoInput}</div>
   <div class="u-field">${categoriasInput}</div>
@@ -114,12 +116,12 @@ display(figureRow([
   {
     label: "Sin fecha de hechos",
     value: sinFechaSel,
-    note: "No incluidos en las demás cifras ni en las series."
+    note: "No incluidos en las series de tiempo"
   }
 ]));
 ```
 
-<p class="u-source">Periodo ${periodoLabel} · las tres categorías particionan el total · Fuente: RNPDNO (CNB/SEGOB) · consultado ${consultado} · ${meta.snapshot} · umbral.mx · datos CC BY 4.0</p>
+<p class="u-source"> Fuente: Elaboración propia con datos del RNPDNO (CNB/SEGOB). Ultima actualización: ${consultado}</p>
 
 </section>
 
@@ -165,14 +167,14 @@ const trendCols = ["periodo", ...series.map((s) => s.label)];
 ```js
 display(chartFrame({
   title: `El RNPDNO acumula ${fmt(trendTotal)} registros con hechos entre ${trendMonths[0]?.periodo ?? ini} y ${trendMonths[trendMonths.length - 1]?.periodo ?? fin}`,
-  subtitle: "México · registros por mes de la fecha de hechos · el registro se actualiza retroactivamente",
+  subtitle: "Registros por mes de la fecha de hechos por categoría.",
   consultado,
   plot: trendChart({series, cut, width}),
   data: trendData,
   columns: trendCols,
   numericColumns: series.map((s) => s.label),
   download: `umbral_rnpdno_tendencia_nacional_${ini}_${fin}_c${consultado}.csv`,
-  note: `${fmt(sinFechaSel)} registros sin fecha de hechos no aparecen en esta serie; se detallan en Datos y método. La cola punteada marca los meses que siguen llenándose.`
+  note: `${fmt(sinFechaSel)} registros sin fecha de hechos no aparecen en esta serie.`
 }));
 ```
 
@@ -251,12 +253,12 @@ display(html`<div class="u-controls">
 
 ```js
 const rankTitle = enTasa
-  ? `${top.entidad_label} registra la tasa más alta: ${fmt1(top.tasa_100k)} registros por 100 mil habitantes (${periodoLabel})`
-  : `${top.entidad_label} concentra el ${fmt1(top.conteo / Math.max(totalRank, 1) * 100)}% de los registros con hechos en ${periodoLabel}`;
+  ? `${top.entidad_label} registra la tasa más alta: ${fmt1(top.tasa_100k)} registros por 100 mil habitantes`
+  : `${top.entidad_label} concentra el ${fmt1(top.conteo / Math.max(totalRank, 1) * 100)}% de los registros`;
 
 const rankSubtitle = enTasa
-  ? `Tasa = registros con hechos en el periodo / población promedio a mitad de año ${y0}–${y1} × 100,000 · «Entidad no especificada» se excluye de las tasas`
-  : "Conteos absolutos, sin ajustar por población — active la tasa para comparar entidades de distinto tamaño";
+  ? `Tasa por cada 100,00 habitantes (registros con hechos en el periodo/población promedio a mitad de año ${y0}–${y1} × 100,000) de los registros con hecho en ${periodoLabel}. Los registros con "entidad no especificada" se excluyen de las tasas.`
+  : "Total de desapariciones por estado (conteos absolutos) de los registros hechos en ${periodoLabel}.";
 ```
 
 ```js
@@ -283,7 +285,7 @@ display(chartFrame({
   columns: ["cve_entidad", "entidad", "conteo", "sin_fecha", "poblacion_promedio", "tasa_100k"],
   numericColumns: ["conteo", "sin_fecha", "poblacion_promedio", "tasa_100k"],
   download: `umbral_rnpdno_ranking_estatal_${ini}_${fin}_c${consultado}.csv`,
-  note: "«+N s/f» = registros de esa entidad sin fecha de hechos, no sumados a la barra. «Entidad no especificada» agrupa registros cuya entidad se desconoce: ubicación desconocida no es cero."
+  note: "+N s/f = registros de esa entidad sin fecha de hechos que no fueron sumados a la barra. "Entidad no especificada" agrupa registros cuya entidad se desconoce o no fue registrada."
 }));
 ```
 
