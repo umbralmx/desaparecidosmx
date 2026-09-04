@@ -308,6 +308,24 @@ body {
    Ninguna gráfica se publica sin título-hallazgo, subtítulo, fuente y CSV
    (UMB-CHT-001/002/003, UMB-A11Y-004). Lo dibuja components/frame.js. */
 
+/* Framework limita TODA <figure>, <table> y <figcaption> a 640px en su
+   global.css. La hoja generada levanta ese tope, pero solo para los hijos
+   directos de #observablehq-main. Las gráficas de este tablero viven
+   dentro de <section class="u-section">, así que nunca coinciden con esa
+   excepción y se quedaban en 640px: Plot dibujaba a todo el ancho y el
+   `max-width: 100%` del svg lo volvía a encoger.
+
+   La medida de 65ch es para la prosa (UMB-LAY-003). Una gráfica y su
+   tabla usan la columna entera. */
+.u-chart,
+.u-chart > figcaption,
+.u-chart-foot,
+.u-table-wrap,
+table.u-table,
+.u-kpis {
+  max-width: none;
+}
+
 .u-chart { margin: 0 0 8px; }
 
 .u-chart-title {
