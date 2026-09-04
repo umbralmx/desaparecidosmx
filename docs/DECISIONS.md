@@ -395,3 +395,42 @@ whenever a call of this kind is made; keep entries short.
   every dated series. The figures stay neutral, with no valenced
   arrows. The per-100k toggle keeps its stated CONAPO vintage. What
   changed is the runtime under those decisions, not the decisions.
+
+## 17. Period filter: a month grid, not two dropdowns
+
+- **Problem:** The period filter was two `<select>` menus, «Desde» and
+  «Hasta», each holding 199 options. Three things were wrong with it.
+  A reader could not see the shape of the register while choosing.
+  Picking a range meant two long scrolling menus. Nothing showed which
+  months hold data and which do not.
+- **Decision:** One range picker, drawn as a grid. The years are rows
+  and the months are columns, so all 199 months are visible at once and
+  the selected range reads as a continuous band. The first click sets
+  the start and the second sets the end. A click before the anchor
+  swaps the ends instead of rejecting the click.
+- **Where the form comes from:** the calendar in `shadcn/ui`, in range
+  mode, cut down to month grain. The finish does not come from there.
+  That component uses rounded corners, a drop shadow and pill-shaped
+  range ends. All three are forbidden (UMB-LAY-001, UMB-LAY-002). The
+  cells here are square, the border is 1px and the range is marked by
+  fill.
+- **Sub-decisions:**
+  1. **Years as rows, not a paged month view.** A calendar that pages
+     one year at a time needs 17 steps to cross this register. The grid
+     needs none.
+  2. **Only the two ends carry `signal`.** The months between them take
+     a `gridline` fill and a `muted` dot. Two hundred dots in signal
+     would spend the view's single accent on a control, which
+     UMB-COL-004 reserves for the data layer.
+  3. **Months without data stay visible and disabled.** They are drawn
+     as a hollow outline, not hidden and not painted as zero. «There is
+     no record» and «zero cases» are different facts (UMB-COL-010).
+  4. **The panel is folded by default.** Open, the grid is about 550px
+     tall. Folded, the trigger states the current range, so the figures
+     and the charts stay on the first screen.
+  5. **It behaves like an Observable input.** The node exposes `value`
+     and emits `input`, so `Generators.input` reads it exactly like an
+     `Inputs.select`. No page code knows it is custom.
+  6. **The grid is one tab stop.** A roving `tabindex` moves with the
+     focus. Arrows move by month and by year, Enter selects, and Escape
+     cancels a half-made range (UMB-A11Y-006).
