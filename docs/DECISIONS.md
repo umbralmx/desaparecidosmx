@@ -477,3 +477,10 @@ whenever a call of this kind is made; keep entries short.
 - **Why:** every value the system defines should have one home. After
   this entry the repo's stylesheet holds no colour, no type stack and no
   component the guide already ships.
+- **Sent back upstream:** the reusable findings from this migration are
+  in `docs/framework-notes.md`, and the six that are the guide's to fix
+  are filed as umbralmx/umbral-style-guide#9. The first of those is a
+  real defect: the generated Framework stylesheet lifts Framework's 640px
+  cap only for direct children of `#observablehq-main`, so any chart
+  inside a `<section>` — which the minimal idiom asks for — silently
+  renders at 640px.

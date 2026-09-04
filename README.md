@@ -119,8 +119,10 @@ served from a domain root or any other subpath.
 
 Design decisions (descriptive monitor, SIN_FECHA always visible, neutral
 figures, per-100k with stated CONAPO vintage) are logged in
-`docs/DECISIONS.md` entry 12; the move off Streamlit is entry 16. State
-population reference data is built by
+`docs/DECISIONS.md` entry 12; the move off Streamlit is entry 16. What is
+worth reusing in another Framework project — the traps and what to do
+instead — is in [`docs/framework-notes.md`](docs/framework-notes.md).
+State population reference data is built by
 `scripts/build_population_reference.py`.
 
 ## Repository layout
