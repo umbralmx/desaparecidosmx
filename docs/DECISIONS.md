@@ -636,3 +636,43 @@ whenever a call of this kind is made; keep entries short.
   1.64 MB.
 - **Why:** none of this changes what the page says. It changes when the
   page decides to say it.
+
+## 24. The dashboard graphs complete calendar years; the files do not stop
+
+- **Problem:** The register reached 2026-07 and the charts drew it. A year
+  in progress always looks like a collapse: 2026 had seven of twelve
+  months, on top of a register that dates events years late. The final
+  drop said nothing about disappearance in Mexico and read as though it
+  did — the same misreading entry 20 removed the provisional band for,
+  arriving through a different door.
+- **Decision:** The dashboard draws whole calendar years only, up to
+  `anio_corte` = the last year that had already ended on the day of the
+  query. `data/processed/` is untouched and still carries everything the
+  source returned, currently through 2026-07.
+- **Sub-decisions:**
+  1. **The cut happens in the data loaders**, not in the browser, so the
+     page never receives rows it will not draw. `nacional.csv` drops from
+     26,501 rows to 25,521 and `municipios.csv` from 138,835 to 133,135.
+  2. **The rule is derived, not written down.** `anio_corte(dated)` is
+     `year(max(consultado_en)) - 1`, so a re-scrape moves the window by
+     itself and nobody has to remember to bump a constant. The sweep is
+     meant to run in June, which gives the closing year six months of
+     settling before it is published.
+  3. **`meta.json` carries both totals**, and they are named for what
+     they are: `total_con_fecha` (338,956) is what the dashboard draws
+     and reconciles exactly against `nacional.csv`; `total_con_fecha_
+     publicado` (352,906) is what the CSVs contain. Two numbers for one
+     register is a reconciliation hazard, so each says which question it
+     answers.
+  4. **The method page states the gap** rather than hiding it: the
+     figures describe the published files, and a caveat says where the
+     charts stop and why.
+- **Why not just default the period picker to 2025 and let the reader
+  extend it:** the picker would then offer a range whose last months are
+  structurally incomplete, with nothing on the axis to say so. Entry 20
+  already removed the one device that used to mark it. A window the
+  reader cannot misread beats a warning they have to remember.
+- **What this does not claim:** that 2025 is final. It is not — 2025
+  events will keep being registered for years, which is exactly what the
+  vintages in `data/vintages/` are for. The rule is only that a partial
+  year never shares an axis with whole ones.

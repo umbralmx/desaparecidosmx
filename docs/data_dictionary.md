@@ -17,6 +17,15 @@
 >    a handful of monthly CSVs and call it a state total; cover the
 >    full date range **and** `sin-fecha.csv`. See docs/methodology.md.
 
+> 3. **These files are wider than the dashboard.** They carry every
+>    month the source returned, including the year in progress. The
+>    published dashboard graphs whole calendar years only, stopping at
+>    `meta.anio_corte` — the last year that had already ended on the day
+>    of the query — because a partial year on the same axis as whole ones
+>    reads as a collapse. So the dashboard's «registros con fecha de
+>    hechos» is smaller than the sum of these CSVs, on purpose. See
+>    DECISIONS.md #24.
+
 ## Deliverables
 
 Per entidad:

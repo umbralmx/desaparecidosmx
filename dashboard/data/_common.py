@@ -46,6 +46,36 @@ def load_register() -> tuple[pd.DataFrame, pd.DataFrame]:
     return dated, undated
 
 
+def anio_corte(dated: pd.DataFrame) -> int:
+    """El último año calendario que ya había terminado al consultar.
+
+    El tablero solo grafica años completos. Un año en curso se ve bajo
+    —2026 llevaba siete meses cuando se consultó— y esa caída no es una
+    caída: es un año al que le faltan cinco meses, encima de un registro
+    que fecha hechos con años de retraso.
+
+    La regla se deriva de `consultado_en`, no se escribe a mano, para que
+    un re-scrapeo mueva la ventana solo. El barrido está pensado para
+    correr en junio, que le da al año anterior medio año de asentamiento
+    antes de publicarlo (DECISIONS.md #24).
+
+    Los archivos de data/processed/ NO se recortan: llevan todo lo que
+    devolvió la fuente, incluido el año en curso. El recorte es del
+    tablero, no del dato publicado.
+    """
+    return int(str(dated["consultado_en"].max())[:4]) - 1
+
+
+def periodo_corte(dated: pd.DataFrame) -> str:
+    """El último mes que el tablero dibuja, «YYYY-12»."""
+    return f"{anio_corte(dated)}-12"
+
+
+def solo_anios_completos(dated: pd.DataFrame) -> pd.DataFrame:
+    """Las filas con fecha de hechos hasta el último año completo."""
+    return dated[dated["periodo"] <= periodo_corte(dated)]
+
+
 def write_csv(df: pd.DataFrame) -> None:
     """Escribe el DataFrame como CSV a stdout.
 

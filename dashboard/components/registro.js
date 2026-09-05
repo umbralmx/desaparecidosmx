@@ -33,6 +33,12 @@ export const entidades = meta.entidades;
 export const periodos = meta.periodos;
 export const consultado = meta.consultado_en;
 
+/* El último mes que el tablero dibuja: diciembre del último año completo.
+   Los archivos de data/processed/ llegan más lejos (meta.periodo_max_
+   publicado); el recorte es de la vista. Ver DECISIONS.md #24. */
+export const periodoCorte = meta.periodo_corte;
+export const anioCorte = meta.anio_corte;
+
 /* ── Cortes ─────────────────────────────────────────────────────────
    El único filtro global de las páginas es el periodo, y filtrar por
    periodo es un `Array.filter` de una línea que cada vista escribe donde
@@ -68,8 +74,9 @@ export const SEXO_KEYS = Object.keys(SEXO_LABELS);
  * @param {string} fin      último mes (YYYY-MM)
  */
 export function monthlyMatrix(rows, field, keys, ini, fin) {
-  const tope = consultado.slice(0, 7);
-  const months = monthSpan(ini, fin < tope ? fin : tope);
+  // El tablero solo dibuja años completos, así que ningún eje se extiende
+  // más allá del corte aunque se lo pidan (DECISIONS.md #24).
+  const months = monthSpan(ini, fin < periodoCorte ? fin : periodoCorte);
   const index = new Map(months.map((p, i) => [p, i]));
 
   const out = months.map((periodo) => {

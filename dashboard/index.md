@@ -35,8 +35,8 @@ import {
 // Promise.all, así que los 5 KB de metadatos y los 107 KB del grano
 // nacional se piden a la vez y no uno detrás de otro.
 import {
-  CATEGORIA_KEYS, SEXO_KEYS, byEntidad, consultado, cumulativeMatrix,
-  entidades, meta, monthlyMatrix, periodos, sinFecha
+  CATEGORIA_KEYS, SEXO_KEYS, anioCorte, byEntidad, consultado,
+  cumulativeMatrix, entidades, meta, monthlyMatrix, periodos, sinFecha
 } from "./components/registro.js";
 import {nacional, poblacion} from "./components/registro-nacional.js";
 ```
@@ -45,7 +45,7 @@ import {nacional, poblacion} from "./components/registro-nacional.js";
 
 # El RNPDNO registra a las personas desaparecidas, no localizadas y localizadas en México
 
-<p class="u-standfirst">Sin embargo, su acceso es restrictivo y opaco debido a las características de su diseño, la tecnología usada para su operación y los propios retos que enfrentan las autoridades para la recolección y sistematización de dichos datos. Con el objetivo de facilitar su acceso a investigadores, periodistas y de la sociedad civil, Umbral libera esta herramienta. Aquí, podrán acceder a una versión más amplia de la estadística descriptiva y descargar los datos agregados para su consulta. Los datos disponibles en esta herramienta constan de los registros por <strong>fecha de hechos</strong>, 2010–2026, para las 32 entidades más «entidad no especificada».</p>
+<p class="u-standfirst">Sin embargo, su acceso es restrictivo y opaco debido a las características de su diseño, la tecnología usada para su operación y los propios retos que enfrentan las autoridades para la recolección y sistematización de dichos datos. Con el objetivo de facilitar su acceso a investigadores, periodistas y de la sociedad civil, Umbral libera esta herramienta. Aquí, podrán acceder a una versión más amplia de la estadística descriptiva y descargar los datos agregados para su consulta. Los datos disponibles en esta herramienta constan de los registros por <strong>fecha de hechos</strong>, 2010–${anioCorte}, para las 32 entidades más «entidad no especificada». Las gráficas cubren años calendario completos: un año en curso siempre se ve bajo y esa caída es del calendario, no del país. Los archivos que se descargan llegan más lejos.</p>
 
 <p class="u-standfirst">Una nota metodológica importante, es que los datos extraidos del RNPDNO tienden a contar con discrepancias que dificultan la comparación de periodios y a menudo están condicionados a cuándo se hizo la consulta y bajo que filtros, por lo que se actualiza constantemente de manera retroactiva. Para más información, consulta la sección de <strong>datos y método.</strong></p>
 

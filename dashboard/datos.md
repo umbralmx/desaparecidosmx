@@ -15,7 +15,7 @@ import {fmt, titleEs} from "./components/format.js";
 ```
 
 ```js
-import {consultado, entidades, meta, periodos, sinFecha} from "./components/registro.js";
+import {consultado, entidades, meta, sinFecha} from "./components/registro.js";
 ```
 
 <div>${brand()}</div>
@@ -30,6 +30,8 @@ import {consultado, entidades, meta, periodos, sinFecha} from "./components/regi
 
 <div>${label("el registro, en dos cifras")}</div>
 
+<p>Las cifras de abajo son las del <strong>dato publicado</strong>, que llega hasta ${meta.periodo_max_publicado}. El tablero grafica menos: solo años calendario completos, hasta ${meta.periodo_corte}. La razón está en la lista de advertencias.</p>
+
 ```js
 // La cuenta de entidades salió de aquí: un «33» junto a dos totales del
 // registro se leía como una tercera cifra del registro, cuando en realidad
@@ -39,8 +41,8 @@ import {consultado, entidades, meta, periodos, sinFecha} from "./components/regi
 display(html`<div class="u-kpis">
   <div class="u-kpi">
     <span class="u-kpi__label">Registros con fecha de hechos</span>
-    <span class="u-kpi__value">${fmt(meta.total_con_fecha)}</span>
-    <span class="u-kpi__note">Repartidos en ${periodos.length} meses, de ${periodos[0]} a ${periodos[periodos.length - 1]}.</span>
+    <span class="u-kpi__value">${fmt(meta.total_con_fecha_publicado)}</span>
+    <span class="u-kpi__note">De ${meta.periodos_publicados[0]} a ${meta.periodo_max_publicado}. El tablero dibuja ${fmt(meta.total_con_fecha)} de ellos, los de años completos.</span>
   </div>
   <div class="u-kpi">
     <span class="u-kpi__label">Registros sin fecha de hechos</span>
@@ -58,6 +60,7 @@ display(html`<div class="u-kpis">
 
 <ol class="u-caveats">
 <li><strong>El filtro de fecha es sobre la <em>fecha de hechos</em></strong>, no la fecha de registro. Un mes reciente se sigue llenando durante meses o años, así que una caída al final de cualquier serie es rezago de captura y no una mejora.</li>
+<li><strong>El tablero se detiene en ${meta.anio_corte}; los archivos no.</strong> Un año en curso siempre se ve bajo: a ${meta.anio_corte + 1} le faltaban cinco meses cuando se consultó, encima del rezago de captura. Esa caída no dice nada sobre la desaparición en el país y se leía como si lo dijera. Las gráficas cubren años calendario completos; los CSV llevan todo lo que devolvió la fuente, hasta ${meta.periodo_max_publicado}. La ventana se recorre sola: es el último año que ya había terminado el día de la consulta.</li>
 <li><strong>Toda la serie es provisional, no solo su cola.</strong> El registro fecha hechos con años de retraso y reclasifica registros de cualquier antigüedad, de modo que la cifra de 2011 cambia entre dos consultas igual que la del mes pasado. Por eso ninguna gráfica marca un tramo como provisional: hacerlo diría que el resto está cerrado, y no lo está.</li>
 <li><strong>Un mes puede ser una fracción pequeña del registro de un estado.</strong> Hay dos mecanismos. El primero son los registros sin fecha de hechos. El segundo son los hechos ocurridos en otros periodos. Nunca sume unos cuantos meses y lo llame total estatal.</li>
 <li><strong>El registro es vivo.</strong> Los conteos del mismo periodo cambian entre consultas por altas, fechado tardío y reclasificación. Cada fila lleva su <code>consultado_en</code>. Dos consultas distintas no son comparables entre sí.</li>
@@ -101,6 +104,52 @@ display(html`<div class="u-controls">
 <p class="u-source">Corte <code>${meta.snapshot}</code> · consulta realizada el ${consultado} · datos CC BY 4.0 · código MIT</p>
 
 <p class="u-source">Denominador de las tasas: ${meta.poblacion_fuente}</p>
+
+</section>
+
+<section class="u-section">
+
+<div>${label("cortes sucesivos del mismo periodo")}</div>
+
+<p>Cada corte es un re-scrapeo de la misma ventana móvil de 24 meses, hecho en una fecha distinta. Son la evidencia de que el registro se reescribe: al restar dos cortes se ve cuánto cambió el conteo de un mes que ya había pasado en los dos. Es el material para calibrar el rezago de captura, que es lo que hoy no se puede afirmar con un solo corte.</p>
+
+```js
+const VINTAGES = `${REPO}/raw/main/data/vintages`;
+const porAnio = new Map();
+for (const v of meta.vintages) {
+  if (!porAnio.has(v.anio)) porAnio.set(v.anio, []);
+  porAnio.get(v.anio).push(v);
+}
+```
+
+```js
+display(html`<div>
+  ${[...porAnio].map(([anio, lista]) => html`<div>
+    <h3 class="u-panel-title">${anio}</h3>
+    <p class="u-panel-note">${lista.length} ${lista.length === 1 ? "corte" : "cortes"}</p>
+    <div class="u-controls">
+      ${lista.map((v) => html`<a class="u-btn" href=${`${VINTAGES}/${v.label}.csv`}>${v.label}</a>`)}
+    </div>
+  </div>`)}
+</div>`);
+```
+
+```js
+display(dataTable(meta.vintages.map((v) => ({
+  corte: v.label,
+  desde: v.desde,
+  hasta: v.hasta,
+  meses: v.meses,
+  filas: v.filas,
+  kb: v.kb
+})), {
+  columns: ["corte", "desde", "hasta", "meses", "filas", "kb"],
+  numericColumns: ["meses", "filas", "kb"],
+  open: true
+}));
+```
+
+<p class="u-note">Mismo esquema que los archivos anuales. Cada corte trae además un <code>.meta.json</code> con la lista de meses, los estados barridos y los fallos de esa corrida. Los cortes no se suman entre sí ni con <code>data/processed/</code>: cada uno es una lectura completa del mismo periodo en un día distinto.</p>
 
 </section>
 
