@@ -20,7 +20,7 @@ document.documentElement.lang = "es";
 document.documentElement.dataset.mode = "instrumento";
 
 /*
- * Los enlaces son relativos, nunca absolutos.
+ * Los enlaces de NAVEGACIÓN son relativos, nunca absolutos.
  *
  * Las tres páginas son hermanas en el mismo nivel, así que `./estado`
  * resuelve igual servido en la raíz de un dominio que bajo un subcamino
@@ -33,9 +33,23 @@ const PAGES = [
   {id: "datos", href: "./datos", label: "datos y método"}
 ];
 
-/** El lockup, dentro del contenido. Vuelve a la portada del proyecto. */
+/*
+ * El sitio del laboratorio.
+ *
+ * Es la única excepción a la regla de arriba, y es absoluta a propósito:
+ * la marca sale del proyecto, no navega dentro de él. Volver al tablero
+ * lo hace la primera pestaña.
+ *
+ * El dominio se escribe aquí y en la línea de fuente de cada gráfica, que
+ * lo toma del valor por defecto de `Frame` en @umbralmx/umbral-plot. Son
+ * dos sitios, no uno, pero el segundo es del paquete de marca y no de
+ * este repositorio.
+ */
+const SITIO = "https://umbral.org.mx/";
+
+/** El lockup, dentro del contenido. Lleva al sitio del laboratorio. */
 export function brand() {
-  return html`<a class="u-brand" href="./" aria-label="umbral_ — inicio">
+  return html`<a class="u-brand" href=${SITIO} aria-label="umbral_ — ir a umbral.org.mx">
     <img src=${isotipo} alt="" width="24" height="24">
     <span class="u-wordmark">umbral<span>_</span></span>
   </a>`;
