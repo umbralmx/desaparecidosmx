@@ -143,26 +143,57 @@ body {
 .u-brand .u-wordmark span { color: var(--u-signal-text); }
 
 /* ── Navegación de tres páginas ─────────────────────────────────────
-   Los enlaces reusan .u-btn de components.css. Solo se añade el estado
-   activo, que mueve texto y borde a signal (UMB-LAY-008) y que además va
-   marcado con aria-current, porque el color solo no codifica nada
+   Pestañas, con la forma del control segmentado del catálogo: la regla de
+   1px del contenedor es el riel, y la página actual se marca con un
+   subrayado de 2px que se apoya sobre él (.u-seg en components.css,
+   UMB-LAY-008). Cada pestaña reserva ese subrayado en transparente, así
+   que la fila no se mueve al cambiar de página.
+
+   El subrayado va en `ink`, no en `signal`. Dos razones: la navegación no
+   es capa de dato, y el único acento de la vista tiene que quedar libre
+   para la gráfica (UMB-COL-004). En modo instrumento `ink` es el extremo
+   claro de la escala; el que cambie con el modo es justamente el punto de
+   escribirlo como token.
+
+   El estado sigue marcado con aria-current además del subrayado, porque
+   ni el color ni el trazo solos codifican nada para quien no los ve
    (UMB-A11Y-005). */
 
 .u-nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
   margin: 0 0 clamp(36px, 6vh, 64px);
-  padding: 0 0 20px;
   border-bottom: var(--u-rule) solid var(--u-border);
 }
-.u-nav a[aria-current="page"] {
-  border-color: var(--u-signal);
-  color: var(--u-signal-text);
+
+.u-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--u-touch-target);
+  padding: 0 var(--u-space-2);
+  font-family: var(--u-font-mono);
+  font-size: var(--u-size-label);
+  color: var(--u-caption);
+  text-decoration: none;
+  border-bottom: var(--u-rule-strong) solid transparent;
+  /* El subrayado se apoya sobre la regla del contenedor, no debajo. */
+  margin-bottom: calc(-1 * var(--u-rule));
+  transition: color 0.18s ease, border-color 0.18s ease;
 }
-.u-nav a[aria-current="page"]::before {
-  content: "· ";
-  color: var(--u-signal-text);
+
+/* La primera pestaña alinea con el titular, no con su propio relleno. */
+.u-nav a:first-child { padding-left: 0; }
+
+.u-nav a:hover { color: var(--u-ink); }
+
+.u-nav a[aria-current="page"] {
+  color: var(--u-ink);
+  border-bottom-color: var(--u-ink);
+}
+
+.u-nav a:focus-visible {
+  outline: var(--u-rule-strong) solid var(--u-signal);
+  outline-offset: calc(-1 * var(--u-rule-strong));
 }
 
 /* ── Riel de filtros ────────────────────────────────────────────────
@@ -304,6 +335,81 @@ body {
 }
 .u-kpi__note { max-width: 34ch; }
 
+/* ── Leyenda-control ────────────────────────────────────────────────
+   La dibuja components/legend.js. Cada entrada es un <button role="switch">
+   que enciende y apaga su banda de la pila.
+
+   Apagada, la entrada pierde tres cosas a la vez: el cuadro se vacía, el
+   texto se tacha y el color baja a caption. El estado nunca queda
+   codificado solo por el color (UMB-A11Y-005). */
+
+.u-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin: 0 0 16px;
+}
+
+.u-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--u-touch-target);
+  padding: 0;
+  font-family: var(--u-font-body);
+  font-size: 14px;
+  color: var(--u-ink);
+  background: transparent;
+  border: 0;
+  border-radius: var(--u-radius);
+  cursor: pointer;
+  transition: color 0.18s ease;
+}
+
+/* El cuadro lleva el color de la serie, que legend.js pasa como variable
+   desde el mismo objeto que pinta la gráfica. */
+.u-legend__swatch {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  background: var(--u-legend-color);
+  border: var(--u-rule) solid var(--u-legend-color);
+}
+
+.u-legend__item.is-off { color: var(--u-caption); }
+.u-legend__item.is-off .u-legend__swatch { background: transparent; }
+.u-legend__item.is-off .u-legend__label { text-decoration: line-through; }
+
+/* La clave de lectura no reacciona al puntero: no hay nada que pulsar. */
+button.u-legend__item:hover { color: var(--u-signal-text); }
+span.u-legend__item { cursor: default; }
+
+.u-legend__item:focus-visible {
+  outline: var(--u-rule-strong) solid var(--u-signal);
+  outline-offset: var(--u-rule-strong);
+}
+
+/* ── Gráficas en paralelo ───────────────────────────────────────────
+   Dos o tres gráficas que se leen juntas. El JS decide el ancho que le
+   pasa a Plot con el mismo umbral que estas consultas, así que el SVG y
+   la columna que lo hospeda cambian de forma a la vez.
+
+   `min-width: 0` en los hijos: una retícula da a cada columna el ancho
+   mínimo de su contenido, y una tabla ancha dentro de la gráfica
+   desbordaría la fila entera. */
+
+.u-chart-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(24px, 4vw, 40px);
+}
+.u-chart-grid > * { min-width: 0; }
+
+@media (min-width: 860px) {
+  .u-chart-grid { grid-template-columns: repeat(2, 1fr); }
+  .u-chart-grid--3 { grid-template-columns: repeat(3, 1fr); }
+}
+
 /* ── Encuadre de gráfica ────────────────────────────────────────────
    Ninguna gráfica se publica sin título-hallazgo, subtítulo, fuente y CSV
    (UMB-CHT-001/002/003, UMB-A11Y-004). Lo dibuja components/frame.js. */
@@ -328,6 +434,24 @@ table.u-table,
 
 .u-chart { margin: 0 0 8px; }
 
+/* Encabezado de panel dentro de una figura de varios paneles: nombra al
+   panel, no es un título de gráfica. Va en mono, como las demás etiquetas
+   de estructura (UMB-LAY-006). */
+.u-panel-title {
+  font-family: var(--u-font-mono);
+  font-size: var(--u-size-label);
+  font-weight: var(--u-weight-mono-medium);
+  color: var(--u-ink);
+  margin: 0 0 2px;
+}
+.u-panel-note {
+  font-family: var(--u-font-mono);
+  font-size: var(--u-size-source);
+  color: var(--u-caption);
+  margin: 0 0 10px;
+  max-width: none;
+}
+
 .u-chart-title {
   font-family: var(--u-font-display);
   font-weight: var(--u-weight-display);
@@ -349,15 +473,35 @@ table.u-table,
 .u-chart-plot { overflow-x: auto; }
 .u-chart-plot svg { max-width: 100%; height: auto; }
 
+/* El pie de la gráfica, en dos filas.
+
+   Arriba, sobre la regla de 1px, la línea de fuente a dos lados: origen y
+   fecha de consulta a la izquierda, sitio a la derecha (UMB-CHT-003). El
+   `flex-wrap` los apila en una pantalla angosta en vez de dejarlos chocar.
+
+   Abajo, la procedencia: el CSV con la etiqueta del corte y la licencia al
+   lado. Desde la guía 2.0 esas dos salieron de la línea de fuente y viven
+   en la página (UMB-DAT-002, UMB-DAT-004). */
+
 .u-chart-foot {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
+  gap: 4px 24px;
   margin-top: 12px;
   padding-top: 10px;
   border-top: var(--u-rule) solid var(--u-border);
+}
+.u-chart-foot .u-source { flex: 1 1 auto; }
+.u-chart-foot .u-site { flex: 0 0 auto; text-align: right; }
+
+.u-chart-proc {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-top: 10px;
 }
 
 .u-source {

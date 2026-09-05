@@ -51,6 +51,71 @@ export const CATEGORIA_TEXT_COLORS = {
   LOCALIZADA_SIN_VIDA: T.muted
 };
 
+/**
+ * Color por sexo.
+ *
+ * Disjunto del de categoría a propósito: en una misma página conviven
+ * gráficas apiladas por categoría y por sexo, y si las dos usan signal,
+ * model y muted el lector traslada un significado de una a la otra.
+ *
+ * Los tres tokens salen de la paleta de series de la marca —el orden es
+ * signal, model, muted, alert, series-4, series-5— y son los tres que
+ * quedan libres una vez que las categorías se llevan los tres primeros.
+ * No se deriva ningún color nuevo: UMB-COL-002 prohíbe el hex a mano, y un
+ * color calculado fuera de los tokens nunca pasa por la matriz de
+ * contraste.
+ *
+ * Ni azul ni rosa para mujeres. `model` queda descartado dos veces —es
+ * azul y es color de categoría—, y series-5 sale de «mujeres» porque a ese
+ * violeta se le lee el rosa, que es justo la convención de género que hay
+ * que evitar. Mujeres llevan amarillo.
+ *
+ * El reparto de los otros dos lo decide el contraste, no el gusto. El
+ * texto dentro de un azulejo del treemap necesita 4.5:1 contra el relleno,
+ * y series-5 (#b454b3) no llega ni con `base` (4.28:1) ni con `ink`
+ * (3.80:1): cae justo en el centro de la escala de luminosidad. Por eso va
+ * a «indeterminado», que no pasa del 3.1% en ninguna entidad × categoría y
+ * nunca da un azulejo lo bastante grande para llevar texto dentro.
+ * `alert`, a 5.68:1, sí sostiene una etiqueta y va al grupo mayoritario.
+ *
+ * `alert` sobre «hombres» no afirma nada sobre ellos: es la serie 4 de la
+ * paleta categórica de la marca y la gráfica no compara grupos con una
+ * valencia. La regla de dignidad de DECISIONS.md #12 prohíbe el token de
+ * alarma sobre «localizada sin vida», que es una afirmación sobre lo que
+ * le pasó a una persona, no sobre en qué casilla del registro cayó.
+ */
+export const SEXO_COLORS = {
+  HOMBRE: T.alert,
+  MUJER: T["series-4"],
+  INDETERMINADO: T["series-5"]
+};
+
+/*
+ * Variante -text para etiquetas directas (UMB-CHT-005).
+ *
+ * series-4 y series-5 no traen variante -text en los tokens: se publican
+ * como color de marca, con umbral 3:1. La única etiqueta pequeña que los
+ * lleva es la de la leyenda, y va sobre el fondo de la página en tamaño de
+ * cuerpo, no en 12px sobre el dato.
+ */
+export const SEXO_TEXT_COLORS = {
+  HOMBRE: T["alert-text"],
+  MUJER: T["series-4"],
+  INDETERMINADO: T["series-5"]
+};
+
+/**
+ * Los dos papeles de un ranking sin apilar.
+ *
+ * `rankingChart` pinta una barra en signal y el resto en muted. Son dos
+ * papeles, no dos categorías, pero el lector necesita igual la clave que
+ * los nombra.
+ */
+export const RANKING_COLORS = {
+  destacado: T.signal,
+  resto: T.muted
+};
+
 const NF = new Intl.NumberFormat("es-MX", {maximumFractionDigits: 0});
 const NF1 = new Intl.NumberFormat("es-MX", {
   minimumFractionDigits: 1,
@@ -103,18 +168,6 @@ export function monthSpan(ini, fin) {
   }
   return out;
 }
-
-/**
- * Meses cuyos conteos siguen llenándose al momento de la consulta.
- *
- * Seis es un piso, no una promesa: el registro rellena hacia atrás
- * durante años (docs/methodology.md). La ventana se puede calibrar
- * cuando haya suficientes vintages (DECISIONS.md #12.1).
- */
-export const PROVISIONAL_MONTHS = 6;
-
-export const provisionalFrom = (consultadoEn) =>
-  addMonths(consultadoEn.slice(0, 7), -PROVISIONAL_MONTHS);
 
 /* ── CSV ────────────────────────────────────────────────────────────
    Ninguna gráfica se publica sin su CSV descargable (UMB-A11Y-004). Se

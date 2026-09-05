@@ -7,6 +7,22 @@
  * (UMB-CHT-001) y sin subtítulo lanza (UMB-CHT-002). Ninguna vista puede
  * saltárselo.
  *
+ * Actualizado a la guía 2.0.0, que reescribió el pie de la gráfica:
+ *
+ *   - El subtítulo ya no son campos separados por puntos medios. Es una
+ *     frase que nombra la transformación, la unidad, el alcance y el
+ *     periodo (UMB-CHT-002). `Frame.warnings()` avisa cuando no nombra
+ *     ninguna transformación, y scripts/check-charts.mjs convierte ese
+ *     aviso en un fallo de verificación.
+ *   - La línea de fuente tiene dos lados sobre una regla de 1px: a la
+ *     izquierda el origen y la fecha de consulta, a la derecha el sitio
+ *     (UMB-CHT-003). Cinco campos en una línea no sobrevivían a una
+ *     tarjeta social.
+ *   - La etiqueta del corte y la licencia salieron de esa línea y bajaron
+ *     junto al enlace al CSV (UMB-DAT-002, UMB-DAT-004). Una gráfica que
+ *     viaja sola ya no lleva licencia: fue el intercambio deliberado por
+ *     una línea que la gente sí lee.
+ *
  * El DOM se dibuja aquí, con las clases de umbral.css, en vez de usar
  * `Frame.render`: ese método trae los estilos en línea y esta hoja ya
  * define el mobiliario.
@@ -17,19 +33,38 @@
 import {Frame} from "@umbralmx/umbral-plot";
 import {csvHref, fmt} from "./format.js";
 
-const SOURCE = "RNPDNO (CNB/SEGOB)";
+/*
+ * «Elaboración propia con datos de …» es la forma correcta cuando el
+ * cálculo es nuestro y el dato crudo es de alguien más
+ * (guide/08-anatomia-grafica.md). Es el caso de todas las gráficas de este
+ * tablero: la fuente publica agregados por combinación de filtros y aquí
+ * se recomponen, se suman y se acumulan.
+ */
+const SOURCE = "Elaboración propia con datos del RNPDNO (CNB/SEGOB)";
 
-/** La línea de fuente del proyecto, armada por el paquete de marca. */
-export function sourceLine(consultadoEn, extra = "") {
-  const frame = new Frame({
-    title: "marcador",
-    subtitle: "marcador",
+/** La etiqueta del corte, que va en la página junto al CSV (UMB-DAT-002). */
+export const snapshotTag = (consultadoEn) => `rnpdno-${consultadoEn.slice(0, 7)}`;
+
+/** Construye el Frame que valida y redacta las dos mitades del pie. */
+function makeFrame({title, subtitle, consultado}) {
+  return new Frame({
+    title,
+    subtitle,
     source: SOURCE,
-    accessed: consultadoEn,
-    snapshot: `rnpdno-${consultadoEn.slice(0, 7)}`
+    accessed: consultado
   });
-  const line = frame.sourceLine();
-  return extra ? line.replace(" · umbral.mx", ` · ${extra} · umbral.mx`) : line;
+}
+
+/** La mitad izquierda: origen y fecha de consulta. */
+export function sourceLine(consultadoEn, extra = "") {
+  const line = makeFrame({
+    title: "marcador de posición para la línea",
+    subtitle: "Total de registros, nacional, 2010-2026",
+    consultado: consultadoEn
+  }).sourceLine();
+  // Un denominador ajeno —la población de CONAPO— se nombra junto al
+  // origen, no en otra línea: forma parte de cómo se hizo el cálculo.
+  return extra ? line.replace("(CNB/SEGOB)", `(CNB/SEGOB) y ${extra}`) : line;
 }
 
 /**
@@ -46,6 +81,7 @@ export function sourceLine(consultadoEn, extra = "") {
  * @param {string[]} [o.numericColumns] columnas que van en mono a la derecha
  * @param {string} [o.extraSource]   añadido a la línea de fuente
  * @param {string} [o.note]          nota al pie de la gráfica
+ * @param {Element} [o.controls]     leyenda o selector, entre subtítulo y gráfica
  * @returns {Element} un <figure>
  */
 export function chartFrame({
@@ -58,16 +94,11 @@ export function chartFrame({
   columns,
   numericColumns = [],
   extraSource = "",
-  note = ""
+  note = "",
+  controls = null
 }) {
   // Construir el Frame valida título, subtítulo y fuente antes de dibujar.
-  const frame = new Frame({
-    title,
-    subtitle,
-    source: SOURCE,
-    accessed: consultado,
-    snapshot: `rnpdno-${consultado.slice(0, 7)}`
-  });
+  const frame = makeFrame({title, subtitle, consultado});
   if (!download) throw new Error("una gráfica no se publica sin su CSV (UMB-A11Y-004)");
 
   const fig = document.createElement("figure");
@@ -86,26 +117,48 @@ export function chartFrame({
   sub.textContent = subtitle;
   fig.append(sub);
 
+  // El control va entre el subtítulo y la gráfica, no encima del título:
+  // pertenece a la gráfica, y el título dice el hallazgo que el control
+  // acaba de producir.
+  if (controls) fig.append(controls);
+
   const holder = document.createElement("div");
   holder.className = "u-chart-plot";
   holder.append(plot);
   fig.append(holder);
 
+  // El pie tiene dos lados sobre una regla de 1px (UMB-CHT-003). En una
+  // pantalla angosta se apilan en vez de chocar; lo hace .u-chart-foot.
   const foot = document.createElement("figcaption");
   foot.className = "u-chart-foot";
 
   const src = document.createElement("p");
   src.className = "u-source";
   src.textContent = sourceLine(consultado, extraSource);
-  foot.append(src);
+
+  const site = document.createElement("p");
+  site.className = "u-source u-site";
+  site.textContent = frame.siteLine();
+  foot.append(src, site);
+  fig.append(foot);
+
+  // Debajo, la fila de procedencia: el CSV con la etiqueta del corte y la
+  // licencia al lado. Desde 2.0 estas dos viven en la página, no en la
+  // línea de fuente (UMB-DAT-002, UMB-DAT-004).
+  const proc = document.createElement("div");
+  proc.className = "u-chart-proc";
 
   const a = document.createElement("a");
   a.className = "u-btn";
   a.href = csvHref(data, columns);
   a.download = download;
   a.textContent = "Descargar CSV";
-  foot.append(a);
-  fig.append(foot);
+
+  const tag = document.createElement("p");
+  tag.className = "u-source";
+  tag.textContent = `Corte ${snapshotTag(consultado)} · datos CC BY 4.0 · código MIT`;
+  proc.append(a, tag);
+  fig.append(proc);
 
   if (note) {
     const p = document.createElement("p");

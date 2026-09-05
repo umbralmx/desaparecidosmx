@@ -65,7 +65,17 @@ export const entidades = meta.entidades;
 export const periodos = meta.periodos;
 export const consultado = meta.consultado_en;
 
-/* ── Filtros ────────────────────────────────────────────────────────
+/* ── Cortes ─────────────────────────────────────────────────────────
+   El único filtro global de las páginas es el periodo, y filtrar por
+   periodo es un `Array.filter` de una línea que cada vista escribe donde
+   se lee. Lo que sí vive aquí es el remodelado: pasar de filas largas del
+   registro a la matriz mes × serie que consumen las gráficas.
+
+   Categoría y sexo ya no se filtran de forma global. Cada gráfica que los
+   necesita trae su propio control —la leyenda de la tendencia, el selector
+   del apilado por sexo—, así que el corte se hace sobre el dato ya
+   recortado por periodo y no antes.
+
    No hay interruptor de «incluir sin fecha»: los registros sin fecha se
    dibujan siempre como elementos aparte y no entran en ninguna serie
    (DECISIONS.md #12.3). */
@@ -74,56 +84,76 @@ export const CATEGORIA_KEYS = Object.keys(CATEGORIA_LABELS);
 export const SEXO_KEYS = Object.keys(SEXO_LABELS);
 
 /**
- * Aplica el filtro y devuelve {rows, sinDesglose}.
+ * Una fila por mes, una columna por clave.
  *
- * Las filas sin desglose de sexo —los residuales de MUNICIPIO NO
- * DESGLOSADO— se conservan mientras estén seleccionados todos los sexos,
- * para que los totales cuadren con el registro. Se excluyen, y se cuentan
- * aparte, en cuanto el lector recorta por sexo: no se pueden atribuir a
- * ninguno.
+ * Es la forma que consumen el histograma apilado y el área acumulada: la
+ * gráfica, el CSV y la tabla salen todos de esta misma matriz, así que no
+ * pueden decir tres cifras distintas del mismo mes.
+ *
+ * Los meses sin ninguna fila salen igualmente, en cero. Un hueco en el eje
+ * temporal se leería como un mes que no existe.
+ *
+ * @param {object[]} rows   filas del registro, ya filtradas
+ * @param {string} field    la columna que reparte las series («categoria», «sexo»)
+ * @param {string[]} keys   los valores de esa columna, en orden
+ * @param {string} ini      primer mes (YYYY-MM)
+ * @param {string} fin      último mes (YYYY-MM)
  */
-export function applyFilters(rows, {periodoIni, periodoFin, categorias, sexos}) {
-  const cats = new Set(categorias);
-  const todosLosSexos = sexos.length === SEXO_KEYS.length;
-  const sexSet = new Set(sexos);
+export function monthlyMatrix(rows, field, keys, ini, fin) {
+  const tope = consultado.slice(0, 7);
+  const months = monthSpan(ini, fin < tope ? fin : tope);
+  const index = new Map(months.map((p, i) => [p, i]));
 
-  const out = [];
-  let sinDesglose = 0;
+  const out = months.map((periodo) => {
+    const row = {periodo};
+    for (const k of keys) row[k] = 0;
+    return row;
+  });
+
   for (const r of rows) {
-    if (r.periodo < periodoIni || r.periodo > periodoFin) continue;
-    if (!cats.has(r.categoria)) continue;
-    if (todosLosSexos) {
-      out.push(r);
-      continue;
-    }
-    if (!r.sexo) {
-      sinDesglose += r.conteo;
-      continue;
-    }
-    if (sexSet.has(r.sexo)) out.push(r);
+    const i = index.get(r.periodo);
+    if (i === undefined) continue;
+    // Una clave que no está en `keys` —un sexo vacío, por ejemplo— no se
+    // inventa una columna: se cuenta aparte, fuera de esta matriz.
+    const k = r[field];
+    if (!(k in out[i])) continue;
+    out[i][k] += r.conteo;
   }
-  return {rows: out, sinDesglose};
+  return out;
 }
 
-/** Suma por una clave. */
-export function sumBy(rows, key) {
-  const m = new Map();
-  for (const r of rows) m.set(r[key], (m.get(r[key]) ?? 0) + r.conteo);
-  return m;
+/** La misma matriz, con cada columna acumulada mes a mes. */
+export function cumulativeMatrix(matrix, keys) {
+  const acc = Object.fromEntries(keys.map((k) => [k, 0]));
+  return matrix.map((r) => {
+    const row = {periodo: r.periodo};
+    for (const k of keys) {
+      acc[k] += r[k] ?? 0;
+      row[k] = acc[k];
+    }
+    return row;
+  });
 }
 
 /**
- * Serie mensual sobre el tramo pedido; la ausencia de fila es cero.
+ * Suma por entidad × clave: {cve_entidad, [key]: conteo, total}.
  *
- * Los meses posteriores a la consulta no se dibujan: todavía no pueden
- * contener hechos registrados.
+ * Lo que necesitan los dos rankings apilados de la portada.
  */
-export function monthlySeries(rows, ini, fin) {
-  const tope = consultado.slice(0, 7);
-  const months = monthSpan(ini, fin < tope ? fin : tope);
-  const m = new Map(months.map((p) => [p, 0]));
-  for (const r of rows) if (m.has(r.periodo)) m.set(r.periodo, m.get(r.periodo) + r.conteo);
-  return months.map((periodo) => ({periodo, conteo: m.get(periodo)}));
+export function byEntidad(rows, field, keys) {
+  const m = new Map();
+  for (const r of rows) {
+    let acc = m.get(r.cve_entidad);
+    if (!acc) {
+      acc = {cve_entidad: r.cve_entidad, total: 0};
+      for (const k of keys) acc[k] = 0;
+      m.set(r.cve_entidad, acc);
+    }
+    if (!(r[field] in acc)) continue;
+    acc[r[field]] += r.conteo;
+    acc.total += r.conteo;
+  }
+  return m;
 }
 
 /** Nombre de entidad por clave. */

@@ -1,6 +1,6 @@
 {
   "name": "@umbralmx/umbral-plot",
-  "version": "1.6.0",
+  "version": "2.0.0",
   "description": "The Umbral design system for Observable Plot — theme, chart frame and uncertainty helpers",
   "type": "module",
   "main": "src/index.js",
