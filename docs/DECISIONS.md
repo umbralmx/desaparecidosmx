@@ -484,3 +484,155 @@ whenever a call of this kind is made; keep entries short.
   cap only for direct children of `#observablehq-main`, so any chart
   inside a `<section>` — which the minimal idiom asks for — silently
   renders at 640px.
+
+## 19. Adopt style guide 2.0.0: the subtitle names the construction
+
+- **Problem:** The guide shipped a breaking change to the chart frame
+  (`ec88f2cf`, 2026-09-04, released as 2.0.0). Every subtitle and source
+  line in this repo became non-conformant the moment it landed. No token
+  value changed.
+- **Decision:** Vendor `@umbralmx/umbral-plot` 2.0.0 and rewrite the
+  frame to match, rather than pin the old commit and drift.
+- **Sub-decisions:**
+  1. **Subtitles name the transformation** (UMB-CHT-002). They were
+     three middot-separated fields — `México · 2010-01 a 2026-07 ·
+     registros por mes`. They are now a phrase: «Suma acumulada de
+     registros por fecha de hechos dentro del periodo, apilada por
+     categoría, nacional, 2010-01 a 2026-07». A cumulative sum and a
+     monthly count draw different curves from the same rows, and the
+     old form never said which one you were looking at.
+  2. **The source line has two sides** (UMB-CHT-003): origin and access
+     date left, `umbral.org.mx` right, over the 1px rule. The site was
+     `umbral.mx`, a domain the lab does not publish on.
+  3. **The snapshot tag and the licence moved to the page**
+     (UMB-DAT-002, UMB-DAT-004), beside each CSV button. A chart that
+     travels alone now carries no licence. That is the guide's
+     deliberate trade for a line people will actually read.
+  4. **`Frame.warnings()` is wired into verification.** The guide's own
+     validator flags a subtitle that names no transformation, a title
+     with a full stop, and a title that reads like a topic. All 35
+     titles and subtitles pass it.
+- **Why:** the guide is the normative layer and this repo is its first
+  consumer. Pinning past a breaking change is how two definitions of one
+  rule start.
+
+## 20. No chart marks a provisional segment
+
+- **Problem:** Every monthly series shaded the last six months as
+  provisional, with a dashed rule and a «provisional →» label, on the
+  reasoning that recent months are still filling in.
+- **Decision:** Remove the band, the rule and the label from every
+  chart, along with `PROVISIONAL_MONTHS` and `provisionalFrom`.
+- **Why:** the claim was false in the direction that matters. The
+  register backfills events by years and reclassifies records of any
+  age, so a 2011 count changes between two queries exactly as a
+  last-month count does. Shading six months asserted the opposite — that
+  everything to the left was closed. Six was never a measurement either;
+  entry 12.1 called it a floor pending enough vintages, and those
+  vintages still do not exist.
+- **Where the warning went instead:** the subtitle, which the guide says
+  is where a reader-warning belongs, and which covers the whole series
+  rather than its tail. The note under each series keeps the part that
+  reads well and is still true: a fall at the end of the line is capture
+  lag, not an improvement.
+
+## 21. One colour per category everywhere, and a sex palette disjoint from it
+
+- **Problem:** Category and sex were both drawn with signal, model and
+  muted. A reader who learned «teal = desaparecidas» on one figure met
+  teal meaning «hombres» two figures down.
+- **Decision:** Categories keep signal / model / muted in every figure
+  that splits by category. Sex takes the three tokens that are left:
+  alert, series-4, series-5. The two palettes never overlap.
+- **Sub-decisions:**
+  1. **No colour is derived.** UMB-COL-002 forbids hand-written hex, and
+     UMB-COL-012 explains why a computed colour is worse than a wrong
+     one: it never reaches the contrast gate. The brand ships six
+     categorical tokens; three are spent on categories; the remaining
+     three are the whole option space.
+  2. **Neither blue nor pink for the two groups a reader compares.**
+     `model` is out twice over — it is blue and it is a category colour.
+     Women take series-4, yellow.
+  3. **series-5 goes to «indeterminado» because of contrast, not
+     taste.** Text inside a treemap tile needs 4.5:1 against its fill,
+     and `#b454b3` clears it against neither `base` (4.28:1) nor `ink`
+     (3.80:1) — it sits in the middle of the lightness range. It is
+     therefore the one token that cannot carry a labelled tile.
+     «Indeterminado» never exceeds 3.1% of any entidad × categoría, so
+     it never fills a tile big enough to label.
+  4. **`alert` on «hombres» is not a valence claim.** It is series 4 of
+     the brand's categorical palette. Entry 12's dignity rule bars the
+     alarm token from «localizada sin vida», which is a statement about
+     what happened to a person, not about which bucket of the register
+     they fell into.
+  5. **The treemap measures contrast per tile at draw time** and refuses
+     to draw a label it cannot make readable, choosing the better of
+     `base` and `ink`. Measuring beats a table: a future token change
+     cannot silently leave an unreadable label behind.
+- **Verified:** separation with the guide's own `audit/scripts/cvd.py`
+  (UMB-COL-008). The worst pair of the sex trio is alert / series-5
+  under tritanopia at 0.119 OKLab, above the 0.10 threshold.
+
+## 22. A colour key on every figure
+
+- **Problem:** UMB-CHT-005 asks for direct series labels instead of a
+  legend box. A stacked chart has no line end to hang one on — every
+  band ends in the same column — so four of the twelve figures named
+  their colours nowhere.
+- **Decision:** Every figure that splits by colour carries a key,
+  rendered by `components/legend.js` between subtitle and plot.
+- **Sub-decisions:**
+  1. **On the trend charts the key is also the control.** Clicking a
+     category hides its band. The last visible one cannot be turned off:
+     an empty chart is a dead end with no explanation.
+  2. **A static key is a `<span>`, not a `<button>`.** A button that
+     does nothing when pressed is a broken promise, and it takes a stop
+     in the tab order to get there.
+  3. **Off is three cues, not one.** The swatch empties, the label is
+     struck through and the text drops to caption. Colour alone never
+     carries state (UMB-A11Y-005).
+  4. **The cumulative area lost its direct labels.** With a key present
+     they repeated the same three names thirty pixels away and cost
+     150px of right margin on a half-width chart. A deliberate step away
+     from UMB-CHT-005, taken because the key is now guaranteed.
+  5. **The municipal ranking's key names roles, not categories** —
+     «Cuauhtémoc» against «los demás municipios» — because there the
+     colour separates the highlighted bar from the rest.
+
+## 23. The page builds what the reader can see, and nothing else
+
+- **Problem:** The rebuilt pages loaded poorly. Measured on the
+  committed version: the six figures of the portada cost ~423 ms of main
+  thread, put ~5,500 nodes in the DOM, and created six Blob URLs.
+- **Decision:** Four changes, in descending order of what they bought.
+- **Sub-decisions:**
+  1. **The collapsed data table is built on first open.** 671 rows and
+     ~3,400 cells were built eagerly for content inside a closed
+     `<details>`. That was 183 ms of the 423. The summary still states
+     the row count, so UMB-A11Y-003 holds: the numbers stay reachable
+     without the chart, one click away. `open: true` still builds
+     immediately, which is what the method page needs.
+  2. **The CSV is serialised on click, not on draw.** `csvHref` called
+     `URL.createObjectURL` while each figure was being built and nobody
+     revoked it. Six blobs on open, and six more on every period change,
+     each holding a full CSV until the tab closed. `csvButton` builds
+     the file when someone asks for it and revokes the URL a second
+     later.
+  3. **Sections below the fold wait for the reader** via the
+     `whenVisible` observer that entry 16 already used for the municipal
+     file. Each reserves its height so the page does not jump.
+  4. **The register is two modules.** `registro.js` fetches 5 KB of
+     metadata and the undated block, which all three pages need.
+     `registro-nacional.js` fetches the 107 KB national grain, which two
+     of them need. `municipios.js` fetches nothing until asked. The
+     method page was downloading and parsing 26,501 rows it never
+     touches, and carried an 8 MB municipal attachment in its graph.
+     Neither heavy module imports the light one, on purpose: Framework
+     compiles a block's imports into one `Promise.all`, so they load in
+     parallel, and a dependency between them would make that a chain.
+- **Measured after:** frame construction 183 ms → 16 ms, table rows in
+  the DOM at load 671 → 0, Blob URLs at load 6 → 0, data attachments on
+  the method page 10.23 MB → 198 kB and on the portada 10.24 MB →
+  1.64 MB.
+- **Why:** none of this changes what the page says. It changes when the
+  page decides to say it.

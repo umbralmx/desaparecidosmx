@@ -1,10 +1,17 @@
 /**
- * Carga y filtrado del registro.
+ * Lo ligero del registro: metadatos, el bloque sin fecha, y el remodelado.
  *
- * Los cargadores entregan CSV: 107 KB comprimidos para el grano nacional y
- * 744 KB para el municipal. Se eligió CSV sobre parquet porque
- * `FileAttachment.parquet()` arrastra 6.2 MB de parquet-wasm al navegador
- * para descomprimir medio mega de datos.
+ * Se separó de `registro-nacional.js` por una razón medible. Este módulo
+ * pide 5 KB —`meta.json` y `sin-fecha.csv`— y lo importan las TRES páginas.
+ * El grano nacional pesa 107 KB comprimidos y solo lo usan dos. Mientras
+ * ambos vivían aquí, la página de método descargaba y parseaba 26,501
+ * filas que no mira nunca.
+ *
+ * El paralelismo no se pierde: Framework funde las importaciones de UN
+ * bloque en un solo `Promise.all`, así que una página que importe los dos
+ * módulos en el mismo bloque los baja a la vez. Por eso `registro-nacional`
+ * no importa a este: si lo hiciera, su descarga tendría que esperar a que
+ * esta terminara.
  *
  * Todo el filtrado ocurre en el navegador: el sitio es estático y no habla
  * con ningún servidor.
@@ -12,54 +19,15 @@
  * Las filas con fecha y las sin fecha nunca se suman (DECISIONS.md #12.3).
  */
 import {FileAttachment} from "observablehq:stdlib";
-import {CATEGORIA_LABELS, SEXO_LABELS, monthSpan} from "./format.js";
+import {CATEGORIA_LABELS, SEXO_LABELS, monthSpan, numeric} from "./format.js";
 
-/**
- * Las claves INEGI son texto, no números.
- *
- * `csv({typed: true})` convertiría «01» en 1 y perdería el cero inicial de
- * cada clave de entidad y de municipio. Por eso se lee todo como texto y
- * solo se convierten a número las columnas que de verdad lo son.
- */
-function numeric(rows, columns) {
-  for (const r of rows) for (const c of columns) r[c] = +r[c];
-  return rows;
-}
-
-/*
- * Los cuatro archivos se piden a la vez.
- *
- * Escritos como cuatro `await` seguidos, el navegador hacía cuatro viajes
- * en serie y la página esperaba la suma de los cuatro. Ninguno depende de
- * otro, así que van en un solo Promise.all y la espera pasa a ser la del
- * más lento.
- */
-const [metaRaw, nacionalRaw, sinFechaRaw, poblacionRaw] = await Promise.all([
+const [metaRaw, sinFechaRaw] = await Promise.all([
   FileAttachment("../data/meta.json").json(),
-  FileAttachment("../data/nacional.csv").csv(),
-  FileAttachment("../data/sin-fecha.csv").csv(),
-  FileAttachment("../data/poblacion.csv").csv()
+  FileAttachment("../data/sin-fecha.csv").csv()
 ]);
 
 export const meta = metaRaw;
-export const nacional = numeric(nacionalRaw, ["conteo"]);
 export const sinFecha = numeric(sinFechaRaw, ["conteo"]);
-export const poblacion = numeric(poblacionRaw, ["anio", "poblacion"]);
-
-/**
- * Grano municipal, solo de una entidad.
- *
- * Son 139 mil filas para las 33 entidades. Solo la página de estado las
- * pide, y se filtran en cuanto se leen: la vista nunca guarda las demás.
- */
-let municipiosCache = null;
-export async function municipiosDe(cveEntidad) {
-  municipiosCache ??= numeric(
-    await FileAttachment("../data/municipios.csv").csv(),
-    ["conteo"]
-  );
-  return municipiosCache.filter((r) => r.cve_entidad === cveEntidad);
-}
 
 export const entidades = meta.entidades;
 export const periodos = meta.periodos;

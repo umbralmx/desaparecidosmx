@@ -31,7 +31,7 @@
 // dibuja la línea de fuente. El literal «Fuente:» vive en Frame.sourceLine()
 // del paquete de marca, así que la heurística de un archivo a la vez no lo ve.
 import {Frame} from "@umbralmx/umbral-plot";
-import {csvHref, fmt} from "./format.js";
+import {csvButton, fmt} from "./format.js";
 
 /*
  * «Elaboración propia con datos de …» es la forma correcta cuando el
@@ -148,11 +148,7 @@ export function chartFrame({
   const proc = document.createElement("div");
   proc.className = "u-chart-proc";
 
-  const a = document.createElement("a");
-  a.className = "u-btn";
-  a.href = csvHref(data, columns);
-  a.download = download;
-  a.textContent = "Descargar CSV";
+  const a = csvButton({rows: data, columns, filename: download});
 
   const tag = document.createElement("p");
   tag.className = "u-source";
@@ -174,18 +170,52 @@ export function chartFrame({
   return fig;
 }
 
-/** Tabla de datos plegada, con la anatomía de guide/04-layout.md. */
+/**
+ * Tabla de datos plegada, con la anatomía de guide/04-layout.md.
+ *
+ * El <table> se construye la primera vez que se abre el <details>, no al
+ * dibujar la figura. Las seis figuras de la portada suman 671 filas y unas
+ * 3,400 celdas; construirlas de entrada costaba ~183 ms de hilo principal
+ * para un contenido que está plegado y que casi nadie despliega. La regla
+ * de accesibilidad pide que los números sean alcanzables sin la gráfica
+ * (UMB-A11Y-003), y lo siguen siendo: el resumen dice cuántas filas hay y
+ * un clic las trae.
+ *
+ * `open: true` la construye de inmediato, que es lo que necesita la página
+ * de método para su tabla desplegada.
+ */
 export function dataTable(data, {columns, numericColumns = [], open = false} = {}) {
   const cols = columns ?? Object.keys(data[0] ?? {});
   const numeric = new Set(numericColumns);
 
   const details = document.createElement("details");
   details.className = "u-details";
-  details.open = open;
   const summary = document.createElement("summary");
   summary.textContent = `Ver los datos de esta gráfica (${fmt(data.length)} filas)`;
   details.append(summary);
 
+  let construida = false;
+  function construir() {
+    if (construida) return;
+    construida = true;
+    details.append(tabla(data, cols, numeric));
+  }
+
+  // `toggle` también salta al cerrar; la bandera hace la segunda llamada
+  // gratis, así que no hace falta quitar el oyente.
+  details.addEventListener("toggle", () => {
+    if (details.open) construir();
+  });
+
+  if (open) {
+    details.open = true;
+    construir();
+  }
+  return details;
+}
+
+/** El <table> en sí. Separado para poder construirlo tarde. */
+function tabla(data, cols, numeric) {
   const wrap = document.createElement("div");
   wrap.className = "u-table-wrap";
   const table = document.createElement("table");
@@ -226,8 +256,7 @@ export function dataTable(data, {columns, numericColumns = [], open = false} = {
   }
   table.append(tbody);
   wrap.append(table);
-  details.append(wrap);
-  return details;
+  return wrap;
 }
 
 /**

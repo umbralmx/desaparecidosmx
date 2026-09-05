@@ -172,7 +172,14 @@ export function monthSpan(ini, fin) {
 /* ── CSV ────────────────────────────────────────────────────────────
    Ninguna gráfica se publica sin su CSV descargable (UMB-A11Y-004). Se
    arma en el navegador a partir de las mismas filas que dibuja la
-   gráfica, así que no puede desincronizarse de lo que se ve. */
+   gráfica, así que no puede desincronizarse de lo que se ve.
+
+   Se arma AL PULSAR, no al dibujar. Antes cada figura llamaba a
+   `URL.createObjectURL` mientras se construía: seis blobs en la portada
+   nada más abrir, y seis más cada vez que el lector movía el periodo,
+   porque un Blob URL vive hasta que se revoca o se cierra la pestaña.
+   Nadie los revocaba. Ahora el CSV ni siquiera se serializa hasta que
+   alguien lo pide, y su URL se revoca en cuanto el navegador la usa. */
 
 export function toCSV(rows, columns) {
   const cols = columns ?? Object.keys(rows[0] ?? {});
@@ -184,8 +191,53 @@ export function toCSV(rows, columns) {
   return [cols.join(","), ...rows.map((r) => cols.map((c) => cell(r[c])).join(","))].join("\n");
 }
 
-export function csvHref(rows, columns) {
-  return URL.createObjectURL(
-    new Blob([toCSV(rows, columns)], {type: "text/csv;charset=utf-8"})
-  );
+/**
+ * El botón de descarga de una figura.
+ *
+ * @param {object} o
+ * @param {object[]} o.rows      las filas exactas que dibuja la gráfica
+ * @param {string[]} [o.columns] orden de columnas
+ * @param {string} o.filename    nombre del archivo
+ * @param {string} [o.label]
+ * @returns {HTMLAnchorElement}
+ */
+export function csvButton({rows, columns, filename, label = "Descargar CSV"}) {
+  const a = document.createElement("a");
+  a.className = "u-btn";
+  a.href = "#";
+  a.textContent = label;
+  // Un <a download> con href de marcador no descarga nada por sí solo, así
+  // que el clic arma el archivo y lo entrega con un enlace de usar y tirar.
+  a.addEventListener("click", (e) => {
+    e.preventDefault();
+    const url = URL.createObjectURL(
+      new Blob([toCSV(rows, columns)], {type: "text/csv;charset=utf-8"})
+    );
+    const tmp = document.createElement("a");
+    tmp.href = url;
+    tmp.download = filename;
+    document.body.append(tmp);
+    tmp.click();
+    tmp.remove();
+    // Revocar en el mismo turno cancela la descarga en algunos
+    // navegadores; un turno después ya la han tomado.
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+  return a;
+}
+
+/* ── Lectura de CSV ─────────────────────────────────────────────────
+   Las claves INEGI son texto, no números.
+
+   `csv({typed: true})` convertiría «01» en 1 y perdería el cero inicial de
+   cada clave de entidad y de municipio. Por eso se lee todo como texto y
+   solo se convierten a número las columnas que de verdad lo son.
+
+   Vive aquí, y no en registro.js, para que los dos módulos de carga la
+   compartan sin que uno tenga que importar al otro: si `registro-nacional`
+   importara `registro`, sus descargas dejarían de ir en paralelo. */
+
+export function numeric(rows, columns) {
+  for (const r of rows) for (const c of columns) r[c] = +r[c];
+  return rows;
 }

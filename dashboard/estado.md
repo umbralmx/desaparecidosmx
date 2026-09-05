@@ -21,15 +21,20 @@ import {chartFrame, figureRow, snapshotTag, sourceLine} from "./components/frame
 import {
   CATEGORIA_COLORS, CATEGORIA_LABELS, CATEGORIA_TEXT_COLORS,
   SEXO_COLORS, SEXO_LABELS, SEXO_TEXT_COLORS,
-  RANKING_COLORS, csvHref, fmt, fmt1, titleEs
+  RANKING_COLORS, csvButton, fmt, fmt1, titleEs
 } from "./components/format.js";
 ```
 
 ```js
+// Los dos módulos de datos van en el mismo bloque a propósito: Framework
+// funde sus importaciones en un solo Promise.all, así que los 5 KB de
+// metadatos y los 107 KB del grano nacional bajan a la vez.
 import {
   CATEGORIA_KEYS, SEXO_KEYS, consultado, cumulativeMatrix, entidades,
-  monthlyMatrix, municipiosDe, nacional, periodos, sinFecha
+  monthlyMatrix, periodos, sinFecha
 } from "./components/registro.js";
+import {nacional} from "./components/registro-nacional.js";
+import {municipiosDe} from "./components/municipios.js";
 ```
 
 <div>${brand()}</div>
@@ -189,11 +194,16 @@ display(chartFrame({
 
 </section>
 
-<section class="u-section">
+<section class="u-section" id="seccion-sexo-categoria">
 
 <div>${label("sexo dentro de cada categoría")}</div>
 
 ```js
+// Ver index.md: las dos secciones de sexo están bajo el pliegue y esperan
+// a que el lector se acerque en vez de construirse al abrir la página.
+const treeVisible = whenVisible("#seccion-sexo-categoria");
+const sexMesVisible = whenVisible("#seccion-sexo-mes");
+
 // Tres paneles de UNA figura, no tres figuras: la comparación es entre
 // ellos, así que comparten título, fuente, CSV y tabla.
 const treeSeries = SEXO_KEYS.map((k) => ({
@@ -210,7 +220,7 @@ const treeKey = serieLegend(treeSeries, {
   interactive: false
 });
 
-const treePaneles = CATEGORIA_KEYS.map((c) => {
+const treePaneles = !treeVisible ? [] : CATEGORIA_KEYS.map((c) => {
   const data = treeSeries.map((s) => ({
     ...s,
     conteo: rows
@@ -256,7 +266,10 @@ const treePanelesNodo = html`<div class="u-chart-grid u-chart-grid--3">
 ```
 
 ```js
-display(treeConDatos.length
+display(!treeVisible
+  // Reserva la altura para que la página no salte al llegar la figura.
+  ? html`<div style="min-height:380px"></div>`
+  : treeConDatos.length
   ? chartFrame({
       title: treeMin && treeMax && treeMin !== treeMax
         ? `En ${entidadLabel} la proporción de mujeres va del ${fmt1(treeMin.pctMujeres)}% en ${treeMin.label.toLocaleLowerCase("es-MX")} al ${fmt1(treeMax.pctMujeres)}% en ${treeMax.label.toLocaleLowerCase("es-MX")}`
@@ -276,7 +289,7 @@ display(treeConDatos.length
 
 </section>
 
-<section class="u-section">
+<section class="u-section" id="seccion-sexo-mes">
 
 <div>${label("sexo mes a mes")}</div>
 
@@ -294,7 +307,7 @@ const sexoKey = serieLegend(sexoSeries, {
   label: "Sexos de la gráfica mensual",
   interactive: false
 });
-const sexoRows = monthlyMatrix(rows, "sexo", SEXO_KEYS, ini, fin);
+const sexoRows = sexMesVisible ? monthlyMatrix(rows, "sexo", SEXO_KEYS, ini, fin) : [];
 const sexoTotales = sexoSeries.map((s) => ({
   ...s,
   total: sexoRows.reduce((a, r) => a + r[s.key], 0)
@@ -309,22 +322,24 @@ const sexoResidual = rows.reduce((a, r) => a + r.conteo, 0) - sexoTotal;
 ```
 
 ```js
-display(chartFrame({
-  title: sexoMayor && sexoTotal > 0
-    ? `${sexoMayor.label} son el ${fmt1(sexoMayor.total / sexoTotal * 100)}% del registro de ${entidadLabel} en ${periodoLabel}`
-    : `Registros de ${entidadLabel} por mes y sexo, ${periodoLabel}`,
-  subtitle: `Conteo mensual de registros por fecha de hechos, apilado por sexo y con las tres categorías sumadas, ${entidadLabel}, ${periodoLabel}. ${AVISO_RETROACTIVO}`,
-  consultado,
-  controls: sexoKey,
-  plot: stackedMonthlyChart({rows: sexoRows, series: sexoSeries, width}),
-  data: sexoRows,
-  columns: ["periodo", ...SEXO_KEYS],
-  numericColumns: SEXO_KEYS,
-  download: `umbral_rnpdno_sexo_mensual_${cve}_${ini}_${fin}_c${consultado}.csv`,
-  note: sexoResidual > 0
-    ? `${fmt(sexoResidual)} registros de esta selección no traen desglose de sexo y quedan fuera de la pila.`
-    : "El sexo es el que asienta el registro; la fuente no publica identidad de género."
-}));
+display(!sexMesVisible
+  ? html`<div style="min-height:460px"></div>`
+  : chartFrame({
+      title: sexoMayor && sexoTotal > 0
+        ? `${sexoMayor.label} son el ${fmt1(sexoMayor.total / sexoTotal * 100)}% del registro de ${entidadLabel} en ${periodoLabel}`
+        : `Registros de ${entidadLabel} por mes y sexo, ${periodoLabel}`,
+      subtitle: `Conteo mensual de registros por fecha de hechos, apilado por sexo y con las tres categorías sumadas, ${entidadLabel}, ${periodoLabel}. ${AVISO_RETROACTIVO}`,
+      consultado,
+      controls: sexoKey,
+      plot: stackedMonthlyChart({rows: sexoRows, series: sexoSeries, width}),
+      data: sexoRows,
+      columns: ["periodo", ...SEXO_KEYS],
+      numericColumns: SEXO_KEYS,
+      download: `umbral_rnpdno_sexo_mensual_${cve}_${ini}_${fin}_c${consultado}.csv`,
+      note: sexoResidual > 0
+        ? `${fmt(sexoResidual)} registros de esta selección no traen desglose de sexo y quedan fuera de la pila.`
+        : "El sexo es el que asienta el registro; la fuente no publica identidad de género."
+    }));
 ```
 
 </section>
@@ -519,7 +534,11 @@ display(html`<div>
     <p class="u-source u-site">umbral.org.mx</p>
   </div>
   <div class="u-chart-proc">
-    <a class="u-btn" href=${csvHref(sinFechaEstado, ["cve_entidad", "entidad", "categoria", "conteo"])} download=${`umbral_rnpdno_sin_fecha_${cve}_c${consultado}.csv`}>Descargar CSV</a>
+    ${csvButton({
+      rows: sinFechaEstado,
+      columns: ["cve_entidad", "entidad", "categoria", "conteo"],
+      filename: `umbral_rnpdno_sin_fecha_${cve}_c${consultado}.csv`
+    })}
     <p class="u-source">Corte ${snapshotTag(consultado)} · datos CC BY 4.0 · código MIT</p>
   </div>
 </div>`);

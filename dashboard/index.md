@@ -17,6 +17,7 @@ import {brand, nav, label} from "./components/chrome.js";
 // Sin dato: se resuelven en cuanto bajan los módulos.
 import {periodoRange} from "./components/periodo.js";
 import {serieLegend} from "./components/legend.js";
+import {whenVisible} from "./components/lazy.js";
 import {
   cumulativeAreaChart, stackedMonthlyChart, stackedRankChart, treemapChart
 } from "./components/charts.js";
@@ -29,11 +30,15 @@ import {
 ```
 
 ```js
-// El único bloque que espera a la red.
+// El único bloque que espera a la red. Los dos módulos van juntos a
+// propósito: Framework funde las importaciones de un bloque en un solo
+// Promise.all, así que los 5 KB de metadatos y los 107 KB del grano
+// nacional se piden a la vez y no uno detrás de otro.
 import {
   CATEGORIA_KEYS, SEXO_KEYS, byEntidad, consultado, cumulativeMatrix,
-  entidades, meta, monthlyMatrix, nacional, periodos, poblacion, sinFecha
+  entidades, meta, monthlyMatrix, periodos, sinFecha
 } from "./components/registro.js";
+import {nacional, poblacion} from "./components/registro-nacional.js";
 ```
 
 <div>${brand()}</div>
@@ -273,11 +278,18 @@ display(chartFrame({
 
 </section>
 
-<section class="u-section">
+<section class="u-section" id="seccion-sexo-categoria">
 
 <div>${label("sexo dentro de cada categoría")}</div>
 
 ```js
+// Estas dos secciones están muy por debajo del pliegue. Construirlas al
+// abrir la página costaba ~120 ms de hilo principal y unos 1,200 nodos
+// para algo que el lector todavía no ve. `whenVisible` las deja esperar a
+// que se acerque (components/lazy.js); el margen de 600px hace que en la
+// práctica ya estén cuando llega.
+const treeVisible = whenVisible("#seccion-sexo-categoria");
+const rankVisible = whenVisible("#seccion-ranking");
 // Tres paneles de UNA figura, no tres figuras: la comparación es entre
 // ellos, así que comparten título, fuente, CSV y tabla. Es la misma idea
 // que un facetado, con el treemap dibujado a mano por panel.
@@ -295,7 +307,7 @@ const treeKey = serieLegend(treeSeries, {
   interactive: false
 });
 
-const treePaneles = CATEGORIA_KEYS.map((c) => {
+const treePaneles = !treeVisible ? [] : CATEGORIA_KEYS.map((c) => {
   const data = treeSeries.map((s) => ({
     ...s,
     conteo: rows
@@ -341,25 +353,28 @@ const treePanelesNodo = html`<div class="u-chart-grid u-chart-grid--3">
 ```
 
 ```js
-display(chartFrame({
-  title: treeMin && treeMax && treeMin !== treeMax
-    ? `La proporción de mujeres cambia según la categoría: ${fmt1(treeMax.pctMujeres)}% en ${treeMax.label.toLocaleLowerCase("es-MX")} y ${fmt1(treeMin.pctMujeres)}% en ${treeMin.label.toLocaleLowerCase("es-MX")}`
-    : `Reparto por sexo dentro de cada categoría, ${periodoLabel}`,
-  subtitle: `Reparto porcentual por sexo dentro de cada categoría, con el área de cada azulejo proporcional a su número de registros, nacional, ${periodoLabel}.`,
-  consultado,
-  controls: treeKey,
-  plot: treePanelesNodo,
-  data: treeData,
-  columns: ["categoria", "sexo", "conteo", "porcentaje"],
-  numericColumns: ["conteo", "porcentaje"],
-  download: `umbral_rnpdno_sexo_por_categoria_${ini}_${fin}_c${consultado}.csv`,
-  note: `Los porcentajes son dentro de cada categoría, no del registro entero. Los ${fmt(sinFechaTotal)} registros sin fecha de hechos no traen desglose de sexo y quedan fuera.`
-}));
+display(!treeVisible
+  // Reserva la altura para que la página no salte al llegar la figura.
+  ? html`<div style="min-height:380px"></div>`
+  : chartFrame({
+      title: treeMin && treeMax && treeMin !== treeMax
+        ? `La proporción de mujeres cambia según la categoría: ${fmt1(treeMax.pctMujeres)}% en ${treeMax.label.toLocaleLowerCase("es-MX")} y ${fmt1(treeMin.pctMujeres)}% en ${treeMin.label.toLocaleLowerCase("es-MX")}`
+        : `Reparto por sexo dentro de cada categoría, ${periodoLabel}`,
+      subtitle: `Reparto porcentual por sexo dentro de cada categoría, con el área de cada azulejo proporcional a su número de registros, nacional, ${periodoLabel}.`,
+      consultado,
+      controls: treeKey,
+      plot: treePanelesNodo,
+      data: treeData,
+      columns: ["categoria", "sexo", "conteo", "porcentaje"],
+      numericColumns: ["conteo", "porcentaje"],
+      download: `umbral_rnpdno_sexo_por_categoria_${ini}_${fin}_c${consultado}.csv`,
+      note: `Los porcentajes son dentro de cada categoría, no del registro entero. Los ${fmt(sinFechaTotal)} registros sin fecha de hechos no traen desglose de sexo y quedan fuera.`
+    }));
 ```
 
 </section>
 
-<section class="u-section">
+<section class="u-section" id="seccion-ranking">
 
 <div>${label("ranking estatal")}</div>
 
@@ -379,7 +394,9 @@ const rankKeyTasa = serieLegend(rankSeries, {
   interactive: false
 });
 
-const porEntidad = byEntidad(rows, "categoria", CATEGORIA_KEYS);
+const porEntidad = rankVisible
+  ? byEntidad(rows, "categoria", CATEGORIA_KEYS)
+  : new Map();
 
 const sinFechaEntidad = new Map();
 for (const r of sinFecha) {
@@ -447,50 +464,54 @@ const topTasa = rankTasa[0];
 ```
 
 ```js
-display(chartFrame({
-  title: topAbs && totalNacional > 0
-    ? `${topAbs.entidad_label} concentra el ${fmt1(topAbs.total / totalNacional * 100)}% de los registros con hechos en ${periodoLabel}`
-    : `Registros por entidad, ${periodoLabel}`,
-  subtitle: `Total de registros por fecha de hechos, por entidad, apilado por categoría, ${periodoLabel}.`,
-  consultado,
-  controls: rankKeyAbs,
-  plot: stackedRankChart({
-    rows: rankAbs,
-    series: rankSeries,
-    labelKey: "entidad_label",
-    valueLabel: (d) => `${fmt(d.total)} · +${fmt(d.sin_fecha)} s/f`,
-    width
-  }),
-  data: rankAbs,
-  columns: ["cve_entidad", "entidad", ...CATEGORIA_KEYS, "total", "sin_fecha"],
-  numericColumns: [...CATEGORIA_KEYS, "total", "sin_fecha"],
-  download: `umbral_rnpdno_ranking_absoluto_${ini}_${fin}_c${consultado}.csv`,
-  note: `«+N s/f» son los registros de esa entidad sin fecha de hechos, que no están sumados a la barra. «Entidad no especificada» agrupa registros cuya entidad se desconoce o no fue registrada; ubicación desconocida no es cero.`
-}));
+display(!rankVisible
+  ? html`<div style="min-height:900px"></div>`
+  : chartFrame({
+      title: topAbs && totalNacional > 0
+        ? `${topAbs.entidad_label} concentra el ${fmt1(topAbs.total / totalNacional * 100)}% de los registros con hechos en ${periodoLabel}`
+        : `Registros por entidad, ${periodoLabel}`,
+      subtitle: `Total de registros por fecha de hechos, por entidad, apilado por categoría, ${periodoLabel}.`,
+      consultado,
+      controls: rankKeyAbs,
+      plot: stackedRankChart({
+        rows: rankAbs,
+        series: rankSeries,
+        labelKey: "entidad_label",
+        valueLabel: (d) => `${fmt(d.total)} · +${fmt(d.sin_fecha)} s/f`,
+        width
+      }),
+      data: rankAbs,
+      columns: ["cve_entidad", "entidad", ...CATEGORIA_KEYS, "total", "sin_fecha"],
+      numericColumns: [...CATEGORIA_KEYS, "total", "sin_fecha"],
+      download: `umbral_rnpdno_ranking_absoluto_${ini}_${fin}_c${consultado}.csv`,
+      note: `«+N s/f» son los registros de esa entidad sin fecha de hechos, que no están sumados a la barra. «Entidad no especificada» agrupa registros cuya entidad se desconoce o no fue registrada; ubicación desconocida no es cero.`
+    }));
 ```
 
 ```js
-display(chartFrame({
-  title: topTasa
-    ? `${topTasa.entidad_label} registra la tasa más alta: ${fmt1(topTasa.tasa_100k)} registros por cada 100 mil habitantes`
-    : `Tasa por entidad, ${periodoLabel}`,
-  subtitle: `Tasa de registros por cada 100 mil habitantes, por entidad, apilada por categoría, ${periodoLabel}. El denominador es la población media a mitad de año de ${y0}–${y1}.`,
-  consultado,
-  extraSource: "proyecciones de población de CONAPO (rev. 2023)",
-  controls: rankKeyTasa,
-  plot: stackedRankChart({
-    rows: rankTasa,
-    series: tasaSeries,
-    labelKey: "entidad_label",
-    valueLabel: (d) => fmt1(d.tasa_100k),
-    width
-  }),
-  data: rankTasa,
-  columns: ["cve_entidad", "entidad", ...tasaKeys, "tasa_100k", "poblacion_promedio"],
-  numericColumns: [...tasaKeys, "tasa_100k", "poblacion_promedio"],
-  download: `umbral_rnpdno_ranking_tasa_${ini}_${fin}_c${consultado}.csv`,
-  note: `«Entidad no especificada» no aparece aquí: no tiene población que sirva de denominador. Los registros sin fecha de hechos tampoco entran en el numerador, así que la tasa es del periodo elegido y no del registro completo de cada entidad.`
-}));
+display(!rankVisible
+  ? html`<div style="min-height:900px"></div>`
+  : chartFrame({
+      title: topTasa
+        ? `${topTasa.entidad_label} registra la tasa más alta: ${fmt1(topTasa.tasa_100k)} registros por cada 100 mil habitantes`
+        : `Tasa por entidad, ${periodoLabel}`,
+      subtitle: `Tasa de registros por cada 100 mil habitantes, por entidad, apilada por categoría, ${periodoLabel}. El denominador es la población media a mitad de año de ${y0}–${y1}.`,
+      consultado,
+      extraSource: "proyecciones de población de CONAPO (rev. 2023)",
+      controls: rankKeyTasa,
+      plot: stackedRankChart({
+        rows: rankTasa,
+        series: tasaSeries,
+        labelKey: "entidad_label",
+        valueLabel: (d) => fmt1(d.tasa_100k),
+        width
+      }),
+      data: rankTasa,
+      columns: ["cve_entidad", "entidad", ...tasaKeys, "tasa_100k", "poblacion_promedio"],
+      numericColumns: [...tasaKeys, "tasa_100k", "poblacion_promedio"],
+      download: `umbral_rnpdno_ranking_tasa_${ini}_${fin}_c${consultado}.csv`,
+      note: `«Entidad no especificada» no aparece aquí: no tiene población que sirva de denominador. Los registros sin fecha de hechos tampoco entran en el numerador, así que la tasa es del periodo elegido y no del registro completo de cada entidad.`
+    }));
 ```
 
 </section>

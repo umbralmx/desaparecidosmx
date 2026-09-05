@@ -39,19 +39,22 @@ matching the schema, with totals that match the dashboard's displayed count.
 
 ---
 
-<!-- Umbral design system v1.3.0 — paste into a downstream repo's CLAUDE.md.
+<!-- Umbral design system v2.0.0 — paste into a downstream repo's CLAUDE.md.
      GENERATED; regenerate from umbralmx/umbral-style-guide rather than editing. -->
 
 ## Umbral brand — the minimum
 
-This repo follows the Umbral design system at **v1.3.0**.
+This repo follows the Umbral design system at **v2.0.0**.
 
-v1.3.0 ships in `package.json` on the upstream `main` but carries no git
-tag yet — the newest tag is v1.1.0. So every URL below pins the merge
-commit `ef694c5e`, which is immutable in the same way a tag is. Move
-them to `v1.3.0` once that tag exists.
+v2.0.0 ships in `package.json` on the upstream `main` but carries no git
+tag yet — the newest tag is still v1.1.0. So every URL below pins the
+commit `ec88f2cf`, which is immutable in the same way a tag is. Move them
+to `v2.0.0` once that tag exists.
 
-Full guide: https://github.com/umbralmx/umbral-style-guide/tree/ef694c5e9e98658049ff57390856770208908f9c/guide
+2.0 rewrote the chart frame and every published subtitle and source line
+with it. See DECISIONS.md #19; the shape of both is below.
+
+Full guide: https://github.com/umbralmx/umbral-style-guide/tree/ec88f2cf/guide
 
 The dashboard is **modo instrumento** (dark), which is what the guide's
 surface table assigns to a live dashboard. It uses the minimal layout
@@ -73,12 +76,12 @@ See DECISIONS.md #16.
 **Never hand-type a colour, font or spacing value.** Import them:
 
 ```
-https://raw.githubusercontent.com/umbralmx/umbral-style-guide/ef694c5e9e98658049ff57390856770208908f9c/tokens/build/tokens.css     # web
-https://raw.githubusercontent.com/umbralmx/umbral-style-guide/ef694c5e9e98658049ff57390856770208908f9c/tokens/build/tokens.json    # anything
-https://raw.githubusercontent.com/umbralmx/umbral-style-guide/ef694c5e9e98658049ff57390856770208908f9c/tokens/build/tokens.py      # Python / Streamlit / notebooks
-https://raw.githubusercontent.com/umbralmx/umbral-style-guide/ef694c5e9e98658049ff57390856770208908f9c/tokens/build/tokens.R       # R / Quarto
-https://raw.githubusercontent.com/umbralmx/umbral-style-guide/ef694c5e9e98658049ff57390856770208908f9c/tokens/build/streamlit-config.toml
-https://raw.githubusercontent.com/umbralmx/umbral-style-guide/ef694c5e9e98658049ff57390856770208908f9c/rules/rules.json            # the 75 rules, machine-readable
+https://raw.githubusercontent.com/umbralmx/umbral-style-guide/ec88f2cf/tokens/build/tokens.css     # web
+https://raw.githubusercontent.com/umbralmx/umbral-style-guide/ec88f2cf/tokens/build/tokens.json    # anything
+https://raw.githubusercontent.com/umbralmx/umbral-style-guide/ec88f2cf/tokens/build/tokens.py      # Python / Streamlit / notebooks
+https://raw.githubusercontent.com/umbralmx/umbral-style-guide/ec88f2cf/tokens/build/tokens.R       # R / Quarto
+https://raw.githubusercontent.com/umbralmx/umbral-style-guide/ec88f2cf/tokens/build/streamlit-config.toml
+https://raw.githubusercontent.com/umbralmx/umbral-style-guide/ec88f2cf/rules/rules.json            # the 75 rules, machine-readable
 ```
 
 Pin a tag or a commit. Never point at `main` — a token change would land without warning.
@@ -93,8 +96,14 @@ Pin a tag or a commit. Never point at `main` — a token change would land witho
 - Use `signal-text` (`#227c6f`) for text and direct series labels — `signal` only
   clears 3:1, and labels are small text needing 4.5:1.
 - Chart titles state the finding as a sentence, not the topic.
-- Every chart: subtitle (geography · period · unit), source line with licence and snapshot tag,
-  `aria-label` with the finding, and a downloadable CSV.
+- Chart subtitles name the **construction**, not a list of fields: transformation,
+  unit, scope, period, as a phrase. «Suma acumulada de personas desaparecidas por
+  estado, 2021-2026», never «México · 2021-2026 · personas».
+- The source line has two sides over a 1px rule: «Fuente: Elaboración propia con
+  datos de ORIGEN. Consulta realizada el AAAA-MM-DD.» left, «umbral.org.mx» right.
+  No licence and no snapshot tag on that line — both live on the page, next to the
+  CSV link (UMB-DAT-002, UMB-DAT-004).
+- Every chart still needs an `aria-label` carrying the finding, and a downloadable CSV.
 - Space Grotesk **500** for display — never 700. Self-host the fonts; never a CDN.
 - Uncertainty is visible: bands at 0.15 opacity, dashed past the
   present, a dashed `hoy` rule.
