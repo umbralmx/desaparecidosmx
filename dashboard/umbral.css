@@ -41,29 +41,16 @@
 }
 
 /* ── Retícula de puntos ─────────────────────────────────────────────
-   UMB-LAY-009. Vive detrás de la página, en el margen exterior. La hoja la
-   tapa con `base`, así que nunca queda debajo de texto, de una tabla ni de
-   una gráfica: no cambia ningún contraste medido. En pantallas estrechas no
-   hay margen que llenar y se apaga. */
+   Ya no hay retícula de fondo. El margen exterior queda vacío y el único
+   sitio donde sobrevive el motivo del papel milimétrico es la banda de
+   .u-dots, bajo el titular. Ver DECISIONS.md #25.
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-image: radial-gradient(var(--u-baseline) 1px, transparent 1.6px);
-  background-size: 22px 22px;
-  opacity: 0.55;
-}
-
-@media (max-width: 1240px) {
-  body::before { display: none; }
-}
+   Esto se aparta de UMB-LAY-009, que da por hecho que la retícula existe
+   y solo acota dónde puede vivir. Una banda no la pone bajo el texto, que
+   es lo que la regla protege, pero tampoco la deja en el margen. */
 
 /* ── Hoja y columna ─────────────────────────────────────────────────
-   La hoja sostiene el contenido sobre `base` y recorta la retícula al
-   centro. */
+   La hoja sostiene el contenido sobre `base` y centra la columna. */
 
 html { background: var(--u-base); }
 
@@ -93,6 +80,45 @@ body {
   :root { --u-edge: 20px; }
 }
 
+/* ── Sello de actualización ─────────────────────────────────────────
+   Va encima del titular, que es donde el lector mira antes de citar una
+   cifra. Dice las dos fechas que no son la misma y que se confunden todo
+   el tiempo: cuándo se consultó el registro y hasta dónde llega el dato
+   que se dibuja. Hasta ahora la primera solo aparecía en la bajada de
+   «datos y método» y la segunda había que deducirla del eje.
+
+   Recuadro de 1px, no relleno de color: es una etiqueta de estado, no un
+   control, así que no toma signal ni se comporta como UMB-LAY-008. */
+
+.u-updated {
+  display: inline-block;
+  /* Sin altura fija. El alto lo pone el renglón, así que la caja crece con
+     el texto si la pantalla lo parte en dos y nunca lo recorta. */
+  padding: 0 var(--u-space-1);
+  margin: 0 0 var(--u-space-3);
+  border: var(--u-rule) solid var(--u-border);
+  border-radius: var(--u-radius);
+  font-family: var(--u-font-mono);
+  font-size: 12px;
+  line-height: var(--u-space-3);
+  color: var(--u-muted);
+}
+
+/* La hoja generada da la medida de 65ch a todo <p> hijo del main
+   (UMB-LAY-003) y hace falta salirse: son once palabras en mono, y a 65ch
+   se parten en dos renglones que convierten el sello en un párrafo. Es la
+   misma vía de escape que esa hoja ya abre para figure y para table, y
+   necesita el mismo selector para ganarle en especificidad. */
+#observablehq-main > .u-updated {
+  max-width: none;
+  white-space: nowrap;
+}
+
+/* Donde ya no cabe en un renglón, que se parta antes que desbordar. */
+@media (max-width: 560px) {
+  #observablehq-main > .u-updated { white-space: normal; }
+}
+
 /* ── Titular y bajada ───────────────────────────────────────────────
    El resto de la escala tipográfica ya viene de la hoja generada. */
 
@@ -100,7 +126,23 @@ body {
   font-size: clamp(30px, 4.4vw, 46px);
   line-height: 1.16;
   max-width: 22ch;
-  margin: 0 0 16px;
+  margin: 0 0 var(--u-space-3);
+}
+
+/* ── Banda de puntos ────────────────────────────────────────────────
+   Separa el titular de la bajada. Ocupa el ancho de la columna, no la
+   medida del texto: el titular llega a 22ch y la bajada a 65ch, así que
+   la banda es lo único que dibuja de verdad el ancho de la hoja.
+
+   Es decorativa y por eso va con aria-hidden. No lleva texto encima, así
+   que no baja ningún contraste medido —que es lo que UMB-LAY-009 protege
+   cuando manda la retícula al margen. */
+
+.u-dots {
+  height: var(--u-space-2);
+  margin: 0 0 var(--u-space-3);
+  background-image: radial-gradient(var(--u-baseline) 0.9px, transparent 1.2px);
+  background-size: 6px 6px;
 }
 
 /* Framework italiciza el h2 que sigue a un h1 y lo trata como bajada.
@@ -736,6 +778,8 @@ observablehq-loading {
 .u-footer-line { margin: 0 0 6px; max-width: none; }
 
 @media print {
-  body::before { display: none; }
+  /* La banda de puntos es decoración: en papel solo gasta tinta. El sello
+     de actualización sí se imprime, porque es la procedencia de la cifra. */
+  .u-dots { display: none; }
   .u-nav, .u-controls, .u-btn { display: none; }
 }

@@ -6,7 +6,7 @@ toc: false
 ```js
 // Ver index.md: el armazón va aparte para que no espere al dato.
 import "./components/fonts.js";
-import {brand, nav, label} from "./components/chrome.js";
+import {actualizado, brand, nav, label} from "./components/chrome.js";
 ```
 
 ```js
@@ -15,12 +15,16 @@ import {fmt, titleEs} from "./components/format.js";
 ```
 
 ```js
-import {consultado, entidades, meta, sinFecha} from "./components/registro.js";
+import {consultado, entidades, meta, periodoCorte, sinFecha} from "./components/registro.js";
 ```
 
 <div>${brand()}</div>
 
+<p class="u-updated">${actualizado(consultado, periodoCorte)}</p>
+
 # Todo lo que hay que saber antes de citar estos números
+
+<div class="u-dots" aria-hidden="true"></div>
 
 <p class="u-standfirst">Los datos provienen del RNPDNO consultado el ${consultado} (snapshot <code>${meta.snapshot}</code>). El pipeline, los datos y la documentación completa están en el repositorio.</p>
 

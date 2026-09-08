@@ -676,3 +676,57 @@ whenever a call of this kind is made; keep entries short.
   events will keep being registered for years, which is exactly what the
   vintages in `data/vintages/` are for. The rule is only that a partial
   year never shares an axis with whole ones.
+
+## 25. The dot field leaves the margin and becomes a band under the title
+
+- **Problem:** The dot field ran behind the whole page and showed only in
+  the outer margin, because the sheet covered the middle. It read as
+  wallpaper. It said nothing about the page, it disappeared below 1240px,
+  and it was the one part of the layout that a reader on a laptop never
+  saw. The hero had a second gap: the page never said how old the numbers
+  were. The query date lived in one sentence of the method page, and the
+  last month drawn had to be read off a chart axis.
+- **Decision:** Remove the margin field. The margin is now empty. The dot
+  motif moves to a 16px band between the title and the standfirst, on all
+  three pages. Above the title goes a 1px box that names both dates:
+  «última actualización en agosto de 2026 con datos hasta diciembre de
+  2025». The shape comes from opencode.ai/data.
+- **Sub-decisions:**
+  1. **The band spans the column, not the measure.** The title stops at
+     22ch and the standfirst at 65ch. The band is the only element that
+     draws the full width of the sheet, so it states the page's real
+     margins where nothing else does.
+  2. **The box holds two dates, and they are not the same date.**
+     `consultado_en` is when the RNPDNO answered. `periodo_corte` is the
+     last month the dashboard draws. Entry 24 put months between them.
+     Both come from `meta.json`, so a re-scrape moves the text and nobody
+     edits a string.
+  3. **The box is markup in the page; only the two months are a cell.**
+     `actualizado()` returns text, not an element. The browser draws the
+     box and its border in the first paint. If the function returned the
+     whole `<p>`, Framework would show a loading indicator above the
+     title until `meta.json` arrived.
+  4. **The box is not a control.** It takes a 1px border and muted text.
+     It never takes signal and it has no hover state, so UMB-LAY-008 does
+     not apply to it.
+  5. **The band does not print.** It is decoration and it only costs ink.
+     The update box does print, because it is the provenance of every
+     figure on the page.
+  6. **The landing page title is a name, not a sentence.** «Datos del
+     RNPDNO» replaces «El RNPDNO registra a las personas desaparecidas, no
+     localizadas y localizadas en México». A four-line headline above a
+     band reads as a paragraph with a rule under it. The chart rule in
+     UMB-CHT-001 asks a chart title to state a finding, and it still
+     holds for every chart. A page title names the page. The old headline
+     is not lost: it is the first sentence of the standfirst, which now
+     also expands the acronym once, because the title no longer does.
+- **What this departs from:** UMB-LAY-009 says the dot field occupies only
+  the outer margin. The rule protects two things. It keeps dots from under
+  text, where they lower measured contrast, and it keeps them out of
+  UMB-LAY-005's ban on decoration. The band keeps the first guarantee:
+  nothing sits on it, and no contrast measurement changes. It breaks the
+  letter of the rule about location. The rule is a warning, and its check
+  is review, not lint. Report it upstream if the pattern holds up.
+- **Why not keep both:** two dot fields in one view is one too many. The
+  margin field was the weaker of the two. It carried no meaning and it
+  only appeared on wide screens.

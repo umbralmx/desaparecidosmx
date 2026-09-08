@@ -58,11 +58,15 @@ Full guide: https://github.com/umbralmx/umbral-style-guide/tree/ec88f2cf/guide
 
 The dashboard is **modo instrumento** (dark), which is what the guide's
 surface table assigns to a live dashboard. It uses the minimal layout
-idiom, which is mode-independent: dot field in the outer margin only
-(UMB-LAY-009), a content sheet over it, mono lowercase section labels
+idiom, which is mode-independent: mono lowercase section labels
 (UMB-LAY-006), rows separated by 1px rules instead of cards
 (UMB-LAY-007), and secondary controls as 1px mono rectangles that move
 to signal on hover and focus (UMB-LAY-008).
+
+The margins are blank. The dot field no longer lives there: it is a band
+between the page title and the standfirst, above which sits a 1px box
+naming the query month and the last month drawn. That departs from
+UMB-LAY-009 on purpose — see DECISIONS.md #25.
 
 Changing mode means changing three things together: `MODE` in
 `dashboard/components/format.js`, the `data-mode` attribute written by

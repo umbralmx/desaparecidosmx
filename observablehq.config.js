@@ -2,8 +2,9 @@
 //
 // Modo laboratorio (claro). El sitio es un micrositio de proyecto, no un
 // tablero suelto: guide/14-superficies/web.md lo pone en laboratorio, y el
-// idioma visual es el mismo de umbral.org.mx (retícula de puntos en el
-// margen, hoja de contenido, reglas de 1px, etiquetas mono en minúsculas).
+// idioma visual es el mismo de umbral.org.mx (hoja de contenido, reglas de
+// 1px, etiquetas mono en minúsculas). La retícula de puntos ya no vive en
+// el margen: es la banda bajo el titular, ver DECISIONS.md #25.
 import {existsSync} from "node:fs";
 
 // Los cargadores de datos leen data/processed/ con pandas + pyarrow. En local

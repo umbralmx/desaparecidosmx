@@ -73,6 +73,41 @@ export function nav(current) {
   </nav>`;
 }
 
+/*
+ * El sello de actualización, encima del titular.
+ *
+ * Son dos fechas distintas y el lector las confunde: `consultado` es
+ * cuándo se le preguntó al RNPDNO, y `periodoCorte` es hasta dónde llega
+ * el dato que el tablero dibuja. Entre una y otra hay meses, porque el
+ * tablero solo grafica años calendario completos (DECISIONS.md #24).
+ *
+ * El mes se compone aquí y no en format.js a propósito: chrome.js es lo
+ * único que importa el bloque del armazón de cada página, y ese bloque se
+ * dibuja antes de que baje ningún CSV. Traerse format.js —y con él los
+ * tokens de umbral-plot— solo por un Intl retrasaría el primer pintado.
+ */
+const MES = new Intl.DateTimeFormat("es-MX", {
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC"
+});
+
+const mesLargo = (periodo) => MES.format(new Date(`${periodo.slice(0, 7)}-01T00:00:00Z`));
+
+/*
+ * Devuelve TEXTO, no marcado: el recuadro `.u-updated` se escribe en el
+ * markdown de cada página. Así el navegador dibuja la caja con su borde
+ * en el primer pintado y solo los dos meses llegan tarde. Si el helper
+ * devolviera el `<p>` entero, Framework pondría un indicador girando
+ * encima del titular hasta que bajara meta.json.
+ *
+ * @param {string} consultado    fecha de la consulta más reciente (YYYY-MM-DD)
+ * @param {string} periodoCorte  último mes que el tablero dibuja (YYYY-MM)
+ */
+export function actualizado(consultado, periodoCorte) {
+  return `última actualización en ${mesLargo(consultado)} con datos hasta ${mesLargo(periodoCorte)}`;
+}
+
 /** Etiqueta de sección: mono, minúsculas, en caption (UMB-LAY-006). */
 export function label(text) {
   return html`<h2 class="u-label">${text}</h2>`;

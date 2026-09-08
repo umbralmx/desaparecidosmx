@@ -6,7 +6,7 @@ toc: false
 ```js
 // Ver index.md: el armazón va aparte para que no espere al dato.
 import "./components/fonts.js";
-import {brand, nav, label} from "./components/chrome.js";
+import {actualizado, brand, nav, label} from "./components/chrome.js";
 ```
 
 ```js
@@ -31,7 +31,7 @@ import {
 // metadatos y los 107 KB del grano nacional bajan a la vez.
 import {
   CATEGORIA_KEYS, SEXO_KEYS, anioCorte, consultado, cumulativeMatrix,
-  entidades, monthlyMatrix, periodos, sinFecha
+  entidades, monthlyMatrix, periodoCorte, periodos, sinFecha
 } from "./components/registro.js";
 import {nacional} from "./components/registro-nacional.js";
 import {municipiosDe} from "./components/municipios.js";
@@ -39,7 +39,11 @@ import {municipiosDe} from "./components/municipios.js";
 
 <div>${brand()}</div>
 
+<p class="u-updated">${actualizado(consultado, periodoCorte)}</p>
+
 # Cada entidad tiene su propia mezcla de categorías, sexo y municipios
+
+<div class="u-dots" aria-hidden="true"></div>
 
 <p class="u-standfirst">El mismo registro, una entidad a la vez, en años calendario completos hasta ${anioCorte}. Un mes puede ser una fracción pequeña del registro de un estado: los registros sin fecha de hechos viven aparte y nunca se suman a las series.</p>
 
